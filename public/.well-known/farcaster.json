@@ -1,0 +1,35 @@
+{
+  "frame": {
+    "name": "Number Crunch",
+    "version": "1",
+    "iconUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg",
+    "homeUrl": "https://numbers-crunch.vercel.app",
+    "imageUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg",
+    "buttonTitle": "OPEN THE APP",
+    "splashImageUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/splash.jpg",
+    "splashBackgroundColor": "#F8F6F0",
+    "webhookUrl": "https://numbers-crunch.vercel.app/api/webhook",
+    "subtitle": "Strategic Number Puzzles",
+    "description": "Daily math puzzle game where you combine numbers using basic operations to reach a target. Track your progress and share your solutions!",
+    "screenshotUrls": [
+      "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg"
+    ],
+    "primaryCategory": "games",
+    "tags": [
+      "games",
+      "social",
+      "puzzle"
+    ],
+    "heroImageUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg",
+    "tagline": "Where numbers meet their match",
+    "ogTitle": "Number Puzzles",
+    "ogDescription": "Combine numbers using basic operations to reach a target",
+    "ogImageUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg",
+    "castShareUrl": "https://numbers-crunch.vercel.app"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjE3MzA4LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4MTMwOERiMTU4QmMwNDJmQTdDRDQyNTBDOUQwNUNmODEwNzk0MjFlNyJ9",
+    "payload": "eyJkb21haW4iOiJudW1iZXJzLWNydW5jaC52ZXJjZWwuYXBwIn0",
+    "signature": "MHg2ODY5ZDJkNjk5NDJhZGJjYzYzMmQ0N2EwNGJhZWQyZWUyYTM5Zjc5YWI3MGEwZDlmZmI0ODY0MjBmMTY2M2Y0NWE0YjM3MGQyZDlhMTNlYTNiOWYyY2RhMjUwMjVmYjRhMjM1OWJiNTQ2NWIxNDIxMzhlYmQ5YmZmOWQ5Mjc5ODFi"
+  }
+}
