@@ -219,14 +219,24 @@ export const generatePortfolioImage = async (
 
 export const connectWallet = async (): Promise<string | null> => {
   try {
+    console.log('🔌 Attempting wallet connection...');
+    
+    // Check if we're in a browser environment
     if (typeof window !== 'undefined' && window.ethereum) {
+      console.log('🦊 MetaMask detected, requesting accounts...');
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_requestAccounts', []);
-      return accounts[0];
+      
+      if (accounts && accounts.length > 0) {
+        console.log('✅ Wallet connected:', accounts[0]);
+        return accounts[0];
+      }
     }
+    
+    console.log('⚠️ No wallet detected or no accounts available');
     return null;
   } catch (error) {
-    console.error('Failed to connect wallet:', error);
+    console.error('❌ Wallet connection failed:', error);
     return null;
   }
 };

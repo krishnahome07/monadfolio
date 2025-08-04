@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Wallet, Zap, Shield, Users } from 'lucide-react';
-import { validateMonadAddress } from '../utils/monadApi';
+import { validateMonadAddress, connectWallet } from '../utils/monadApi';
 import type { Context } from '@farcaster/frame-core';
 
 interface WalletConnectProps {
-  onConnect: (address?: string) => void;
+  onConnect: (address: string) => void;
   isInFarcaster: boolean;
   farcasterUser?: Context.User;
 }
@@ -23,18 +23,39 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
     setError(null);
     
     try {
-      // In a real implementation, this would connect to the user's wallet
-      // For demo purposes, we'll simulate a connection
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onConnect();
+      console.log('🔌 Attempting auto wallet connection...');
+      
+      // Try to connect to wallet
+      const address = await connectWallet();
+      
+      if (address) {
+        console.log('✅ Wallet connected:', address);
+        onConnect(address);
+      } else {
+        // If no wallet available, generate a demo address for testing
+        const demoAddress = farcasterUser 
+          ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
+          : `0x${'1234567890abcdef'.repeat(2).padStart(40, '0')}`;
+        
+        console.log('🎭 Using demo address:', demoAddress);
+        onConnect(demoAddress);
+      }
     } catch (err) {
-      setError('Failed to connect wallet. Please try manual entry.');
+      console.error('❌ Auto-connect failed:', err);
+      
+      // Fallback to demo address
+      const demoAddress = farcasterUser 
+        ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
+        : `0x${'1234567890abcdef'.repeat(2).padStart(40, '0')}`;
+      
+      console.log('🎭 Fallback to demo address:', demoAddress);
+      onConnect(demoAddress);
     } finally {
       setIsValidating(false);
     }
   };
 
-  const handleManualConnect = () => {
+  const handleManualConnect = async () => {
     setError(null);
     
     if (!manualAddress.trim()) {
@@ -47,7 +68,8 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
       return;
     }
 
-    onConnect();
+    console.log('📝 Manual address entered:', manualAddress);
+    onConnect(manualAddress.trim());
   };
 
   return (
@@ -131,7 +153,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               type="text"
               value={manualAddress}
               onChange={(e) => setManualAddress(e.target.value)}
-              placeholder="0x..."
+              placeholder="0x1234567890abcdef1234567890abcdef12345678"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
             />
             <button
@@ -139,6 +161,18 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200"
             >
               Connect Manually
+            </button>
+            
+            {/* Demo Button for Testing */}
+            <button
+              onClick={() => {
+                const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
+                setManualAddress(demoAddress);
+                onConnect(demoAddress);
+              }}
+              className="w-full bg-purple-100 text-purple-700 py-2 rounded-xl font-medium hover:bg-purple-200 transition-colors duration-200 text-sm"
+            >
+              🎭 Use Demo Address (for testing)
             </button>
           </div>
         </div>
