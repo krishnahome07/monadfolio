@@ -9,7 +9,7 @@
     "splashImageUrl": "https://monadfolio.vercel.app/splash.jpg",
     "splashBackgroundColor": "#6B46C1",
     "webhookUrl": "https://monadfolio.vercel.app/api/webhook",
-    "subtitle": "Monad Portfolio & Identity",
+    "subtitle": "Monad Portfolio and Identity",
     "description": "Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated with Monad news.",
     "screenshotUrls": [
       "https://monadfolio.vercel.app/appicon.png"
@@ -23,7 +23,7 @@
       "defi"
     ],
     "heroImageUrl": "https://monadfolio.vercel.app/appicon.png",
-    "tagline": "Your on-chain identity, visualized",
+    "tagline": "Your on-chain identity",
     "ogTitle": "Monad Portfolio",
     "ogDescription": "Transform your Monad wallet into a social, shareable on-chain identity",
     "ogImageUrl": "https://monadfolio.vercel.app/appicon.png",
