@@ -1,51 +1,57 @@
-# 🔢 Number Crunch - Math Puzzle Game
+# 💼 Monadfolio - Your Monad Portfolio & Identity
 
-A beautiful, production-ready math puzzle game built with React, TypeScript, and Tailwind CSS. Challenge your mind with daily number puzzles where you combine numbers using basic operations to reach a target value.
+A beautiful, production-ready Farcaster mini-app that transforms your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn achievement badges, and stay updated with the latest Monad ecosystem news.
 
-![Number Crunch Game](https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg)
+![Monadfolio App](https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg)
 
-## 🎮 Game Overview
+## 🎯 App Overview
 
-Number Crunch is an engaging math puzzle game where players:
-- Receive a set of random numbers (1-10)
-- Get a target number to reach (10-50)
-- Use basic operations (+, -, ×) to combine numbers
-- Track their progress with time and move counters
-- Share their solutions with friends
+Monadfolio is a comprehensive Farcaster mini-app designed to be a daily-use tool that enhances your on-chain identity within the Monad ecosystem. It combines portfolio visualization, gamified achievements, and curated news into one seamless experience.
 
-## ✨ Features
+## ✨ Core Features
 
-### 🎯 Core Gameplay
-- **Smart Puzzle Generation**: Every puzzle is guaranteed to be solvable
-- **Real-time Timer**: Track how long it takes to solve each puzzle
-- **Move Counter**: Monitor efficiency with move tracking
-- **Solution Path**: Visual display of all steps taken to reach the target
-- **Instant Feedback**: Immediate validation of moves and operations
+### 📊 Portfolio Snapshot
+- **Visual Portfolio**: Beautiful colored block chart where each block's size is proportional to asset value
+- **Real-time Data**: Secure connection to Monad blockchain for up-to-date portfolio information
+- **Customization**: Multiple pre-defined color palettes for personalized visualization
+- **Privacy Controls**: Hide specific assets and toggle total portfolio value display
+- **NFT Showcase**: Rotating display of your digital art and collectibles
+- **Social Sharing**: Cast your portfolio directly to Farcaster with one click
 
-### 📊 User Statistics
-- **Progress Tracking**: Total puzzles solved, best time, average moves
-- **Persistent Storage**: Stats saved using Supabase database
-- **Guest Mode**: Play without registration with local storage fallback
-- **Cross-Platform Sync**: Stats sync across devices when using Farcaster
+### 🏆 Achievement Badges System
 
-### 🎨 User Experience
-- **Beautiful Design**: Modern gradient-based UI with smooth animations
-- **Responsive Layout**: Optimized for all screen sizes
-- **Interactive Tutorial**: First-time user onboarding with "How to Play" popup
-- **Accessibility**: Keyboard navigation and screen reader support
-- **Performance**: Optimized React components with minimal re-renders
-- **Loading States**: Smooth loading experience with proper feedback
+#### NFT-Based Badges
+- **Monad Pioneer**: Hold NFTs from earliest official Monad collections
+- **Collector**: Own NFTs from 3+ distinct collections
+- **Artisan**: Mint your own NFT on the Monad network
 
-### 🔗 Social Features
-- **Share Solutions**: Multiple sharing options (Farcaster, Web Share API, clipboard)
-- **Farcaster Miniapp**: Native integration with Farcaster ecosystem
-- **Smart Onboarding**: Automatic tutorial for new users, manual access for returning users
-- **Social Metadata**: Rich preview cards for social sharing
-- **Guest User Support**: Seamless experience for non-Farcaster users
+#### Portfolio-Based Badges
+- **Monad Whale**: Portfolio value exceeding significant thresholds
+- **Steady Hand**: Long-term holding demonstrating conviction
+- **Diversifier**: Balanced portfolio across different token categories
+- **Growth Spurt**: Rapid portfolio value increase
+
+#### Chain Usage Badges
+- **Active User**: Complete specified number of Monad transactions
+- **DeFi Degenerate**: Interact with multiple Monad-native DeFi protocols
+- **Validator Supporter**: Delegate tokens to Monad validators
+
+### 📰 Monad News Hub
+- **Curated Feed**: Latest updates from official Monad channels
+- **Ecosystem News**: Updates from Monad ecosystem projects
+- **Industry Coverage**: Relevant news from reputable crypto outlets
+- **Real-time Updates**: Stay informed without leaving Farcaster
+- **Categorized Content**: Official, ecosystem, and general news sections
+
+### 🎮 Social Features
+- **Badge Sharing**: Cast your earned badges to showcase achievements
+- **Leaderboards**: Rank users based on portfolio growth and badge count
+- **Community Engagement**: Foster competitive environment within Monad ecosystem
+- **Farcaster Integration**: Native sharing and social features
 
 ## 🚀 Live Demo
 
-**Production URL**: [https://numbers-crunch.vercel.app](https://numbers-crunch.vercel.app)
+**Production URL**: [https://monadfolio.vercel.app](https://monadfolio.vercel.app)
 
 ## 🛠️ Technology Stack
 
@@ -56,15 +62,20 @@ Number Crunch is an engaging math puzzle game where players:
 - **Vite** - Fast build tool and development server
 - **Lucide React** - Beautiful, customizable icons
 
+### Blockchain Integration
+- **Ethers.js** - Ethereum and Monad blockchain interaction
+- **Monad RPC** - Direct connection to Monad network
+- **Wallet Integration** - Secure, non-custodial wallet connectivity
+
+### Farcaster Integration
+- **Farcaster Miniapp SDK** - Native Farcaster miniapp support
+- **Frame Compatibility** - Backward compatibility with Farcaster frames
+- **Social Sharing** - Native Farcaster composer integration
+
 ### Backend & Database
 - **Supabase** - PostgreSQL database with real-time features
 - **Row Level Security (RLS)** - Secure data access patterns
 - **RESTful API** - Clean data fetching with React Query
-
-### Integrations
-- **Farcaster Miniapp SDK** - Native Farcaster miniapp support
-- **Web Share API** - Native sharing capabilities
-- **Local Storage** - Guest user persistence and fallback
 
 ### Development Tools
 - **ESLint** - Code linting and formatting
@@ -76,52 +87,52 @@ Number Crunch is an engaging math puzzle game where players:
 ```
 src/
 ├── components/           # React components
-│   ├── GameBoard.tsx    # Main game interface
-│   ├── GameComplete.tsx # Victory screen
-│   ├── HowToPlay.tsx    # Interactive tutorial popup
-│   ├── SolutionPath.tsx # Solution display
-│   ├── UserStats.tsx    # Statistics component
-│   └── MaintenanceMode.tsx # Maintenance screen
+│   ├── WalletConnect.tsx    # Wallet connection interface
+│   ├── PortfolioSnapshot.tsx # Main portfolio visualization
+│   ├── BadgeCollection.tsx  # Achievement badges display
+│   ├── MonadNews.tsx        # News feed component
+│   └── MaintenanceMode.tsx  # Maintenance screen
 ├── hooks/               # Custom React hooks
-│   ├── useGame.ts       # Game state management
-│   └── useFarcasterSDK.ts # Farcaster integration
-├── lib/                 # External service integrations
-│   └── supabase.ts      # Database client and operations
-├── types/               # TypeScript type definitions
-│   └── game.ts          # Game-related types
+│   ├── useFarcasterSDK.ts   # Farcaster integration
+│   ├── usePortfolio.ts      # Portfolio data management
+│   └── useMonadNews.ts      # News data management
 ├── utils/               # Utility functions
-│   └── gameLogic.ts     # Core game logic and algorithms
+│   └── monadApi.ts          # Monad blockchain API integration
+├── types/               # TypeScript type definitions
+│   └── portfolio.ts         # Portfolio and badge types
 └── App.tsx              # Main application component
 ```
 
-## 🎮 How to Play
+## 🎮 How to Use
 
-1. **Start**: Click "New Game" to generate a fresh puzzle
-2. **Select**: Choose two numbers from the available set
-3. **Operate**: Pick an operation (+, -, ×) to combine them
-4. **Continue**: Keep combining until you reach the target
-5. **Win**: Celebrate and share your solution!
+### For Users
+1. **Connect**: Link your Monad wallet through Farcaster or manual entry
+2. **Visualize**: View your portfolio as a beautiful colored block chart
+3. **Customize**: Choose color palettes and privacy settings
+4. **Earn**: Collect achievement badges based on your on-chain activity
+5. **Share**: Cast your portfolio and badges to your Farcaster feed
+6. **Stay Updated**: Browse the latest Monad ecosystem news
 
-### Game Rules
-- Select exactly 2 numbers before choosing an operation
-- Operations replace the selected numbers with the result
-- Subtraction always returns the absolute difference
-- Game ends when the target number appears in your available numbers
-- First-time users see an automatic tutorial popup explaining the rules
-- Returning users can access tutorial via "How to Play" button
+### For Developers
+1. **Clone** the repository
+2. **Install** dependencies with `npm install`
+3. **Configure** environment variables
+4. **Run** development server with `npm run dev`
+5. **Build** for production with `npm run build`
 
 ## 🔧 Installation & Setup
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn package manager
+- Monad wallet (for testing)
 
 ### Local Development
 
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd number-crunch-game
+cd monadfolio
 ```
 
 2. **Install dependencies**
@@ -136,7 +147,7 @@ cp .env.example .env
 
 4. **Configure Environment Variables**
 ```env
-# Supabase Configuration (optional for basic gameplay)
+# Supabase Configuration
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
@@ -174,38 +185,24 @@ CREATE TABLE users (
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-
--- Enable Row Level Security
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-
--- Policies for anonymous access
-CREATE POLICY "Allow anonymous users to create users" ON users
-  FOR INSERT TO anon WITH CHECK (true);
-
-CREATE POLICY "Allow anonymous users to read user data" ON users
-  FOR SELECT TO anon USING (true);
-
-CREATE POLICY "Allow anonymous users to update user stats" ON users
-  FOR UPDATE TO anon USING (true) WITH CHECK (true);
 ```
 
 ## 🔐 Security Features
 
-### Content Security Policy
-- Strict CSP headers preventing XSS attacks
-- Whitelisted domains for external resources
-- Frame ancestors limited to trusted domains
+### Wallet Security
+- **Non-custodial**: Never stores private keys or sensitive data
+- **Secure Connection**: Uses established Farcaster wallet infrastructure
+- **Privacy Controls**: Users control what data is shared publicly
 
-### Data Validation
-- Input sanitization for usernames and game data
-- SQL injection prevention through parameterized queries
-- Rate limiting on database operations
+### Data Protection
+- **Input Sanitization**: All user inputs are validated and sanitized
+- **SQL Injection Prevention**: Parameterized queries and RLS policies
+- **Content Security Policy**: Strict CSP headers preventing XSS attacks
 
-### Privacy
-- No personal data collection beyond game statistics
-- Guest mode for anonymous play
-- Tutorial preferences stored locally (no server tracking)
-- Secure token handling for Farcaster integration
+### Farcaster Integration
+- **Secure SDK**: Uses official Farcaster miniapp SDK
+- **Frame Compatibility**: Backward compatible with existing Farcaster frames
+- **Privacy Respect**: Only accesses necessary user data
 
 ## 🌐 Deployment
 
@@ -222,40 +219,19 @@ Alternative deployment option with:
 - Security headers
 - Rewrite rules for SPA
 
-### Manual Deployment
-```bash
-npm run build
-# Deploy the 'dist' folder to your hosting provider
-```
+## 🎯 Monad Integration
 
-## 🎯 Game Algorithm
+### Blockchain Features
+- **Real-time Data**: Direct connection to Monad RPC endpoints
+- **Low Latency**: Leverages Monad's high-speed transaction capabilities
+- **Cost Effective**: Benefits from Monad's low transaction costs
+- **Full Compatibility**: Native support for Monad ecosystem
 
-### Puzzle Generation
-1. **Number Generation**: Random numbers within difficulty range
-2. **Solvability Check**: Recursive algorithm ensures every puzzle has a solution
-3. **Target Selection**: Picks achievable targets from possible combinations
-4. **Fallback System**: Guarantees puzzle generation even in edge cases
-
-### Operation Logic
-- **Addition**: Standard arithmetic with overflow protection
-- **Subtraction**: Always returns absolute difference (no negatives)
-- **Multiplication**: With result limits to prevent huge numbers
-
-## 🔄 Application Flow
-
-### Initialization Sequence
-1. **SDK Initialization**: Farcaster miniapp SDK setup
-2. **User Identification**: Create stable user ID (Farcaster or guest)
-3. **Database Connection**: Load user stats from Supabase
-4. **Game Generation**: Create first solvable puzzle
-5. **UI Rendering**: Display game interface
-
-### User Experience Flow
-- **Farcaster Users**: Enhanced experience with profile integration
-- **Guest Users**: Full functionality with local storage
-- **New Users**: Automatic tutorial popup on first visit
-- **Returning Users**: Clean interface with optional tutorial access
-- **Database Unavailable**: Graceful degradation to local-only mode
+### Portfolio Analysis
+- **Asset Detection**: Automatically discovers all Monad assets
+- **NFT Recognition**: Identifies and displays Monad NFTs
+- **DeFi Integration**: Tracks interactions with Monad DeFi protocols
+- **Validator Tracking**: Monitors staking and delegation activities
 
 ## 🤝 Contributing
 
@@ -279,6 +255,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- **Monad Team** - For building an incredible high-performance blockchain
 - **Farcaster Team** - For the excellent miniapp SDK and platform
 - **Supabase** - For the robust backend-as-a-service platform
 - **Tailwind CSS** - For the beautiful utility-first CSS framework
@@ -294,30 +271,32 @@ For support, feature requests, or bug reports:
 ## 🔮 Roadmap
 
 ### Upcoming Features
-- [ ] Daily challenges with leaderboards
-- [ ] Multiple difficulty levels
-- [ ] Advanced tutorial with interactive examples
-- [ ] Achievement system
-- [ ] Multiplayer competitions
-- [ ] Custom puzzle creation
-- [ ] Mobile app versions
+- [ ] Advanced portfolio analytics and insights
+- [ ] Cross-chain portfolio tracking
+- [ ] Social leaderboards and competitions
+- [ ] Custom badge creation for projects
+- [ ] Portfolio performance tracking over time
+- [ ] Integration with more Monad DeFi protocols
+- [ ] Mobile app versions (iOS/Android)
 
 ### Performance Improvements
-- [ ] Service worker for offline play
+- [ ] Service worker for offline functionality
 - [ ] Progressive Web App features
 - [ ] Advanced caching strategies
 - [ ] Bundle size optimization
 
 ---
 
-**Built with ❤️ for the Farcaster community**
+**Built with ❤️ for the Monad ecosystem**
 
-*Number Crunch - Where numbers meet their match!*
+*Monadfolio - Transform your wallet into your identity!*
 
 ---
 
-## 📚 Documentation
+## 📚 Additional Documentation
 
-For detailed technical documentation about the application architecture and flow:
-
-**[📖 App Flow Overview](./docs/APP_FLOW.md)** - Comprehensive guide to how the application initializes, loads, and operates. Essential reading for developers who need to understand the codebase structure and data flow.
+For detailed technical information:
+- [API Documentation](./docs/API.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Contributing Guidelines](./docs/CONTRIBUTING.md)
+- [Security Policy](./docs/SECURITY.md)

@@ -1,120 +1,110 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { GameBoard } from './components/GameBoard';
-import { SolutionPath } from './components/SolutionPath';
-import { UserStats } from './components/UserStats';
-import { GameComplete } from './components/GameComplete';
+import { WalletConnect } from './components/WalletConnect';
+import { PortfolioSnapshot } from './components/PortfolioSnapshot';
+import { BadgeCollection } from './components/BadgeCollection';
+import { MonadNews } from './components/MonadNews';
 import { MaintenanceMode } from './components/MaintenanceMode';
-import { HowToPlay } from './components/HowToPlay';
-import { useGame } from './hooks/useGame';
 import { useFarcasterSDK } from './hooks/useFarcasterSDK';
-import { generateShareText } from './utils/gameLogic';
-import { updateUserStats, getUserStats } from './lib/supabase';
-import { sdk } from '@farcaster/miniapp-sdk';
+import { usePortfolio } from './hooks/usePortfolio';
+import { useMonadNews } from './hooks/useMonadNews';
+import { connectWallet, generatePortfolioImage } from './utils/monadApi';
+import { Wallet, Award, Newspaper, Settings, Share2 } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
-function GameApp() {
-  const { gameState, startNewGame, selectNumber, selectOperation } = useGame();
+function MonadfolioApp() {
   const { context, isReady, isInFarcaster } = useFarcasterSDK();
-  const [statsUpdated, setStatsUpdated] = useState(false);
-  const [refreshStats, setRefreshStats] = useState(0);
+  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'success' | 'error'>('idle');
-  const [userStats, setUserStats] = useState<any>(null);
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  const { 
+    portfolio, 
+    badges, 
+    loading: portfolioLoading, 
+    error: portfolioError,
+    settings,
+    updateSettings,
+    toggleAssetVisibility,
+    getVisibleAssets,
+    getEarnedBadges,
+    refreshPortfolio
+  } = usePortfolio(connectedAddress);
+
+  const {
+    news,
+    loading: newsLoading,
+    error: newsError,
+    refreshNews
+  } = useMonadNews();
 
   // Check if app is enabled (default to true if not set)
   const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
   const isAppEnabled = appEnabledEnv !== 'false';
 
-  // Create a stable user identifier
-  const userIdentifier = useMemo(() => {
-    if (context?.user) {
-      const farcasterUser = context.user.username || context.user.displayName || `fid_${context.user.fid}`;
-      return farcasterUser.replace(/[<>\"'&]/g, '').substring(0, 50);
-    }
-    
-    let guestId = localStorage.getItem('number-crunch-guest-id');
-    if (!guestId) {
-      const array = new Uint8Array(16);
-      crypto.getRandomValues(array);
-      guestId = 'guest_' + Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-      localStorage.setItem('number-crunch-guest-id', guestId);
-    }
-    return guestId;
-  }, [context?.user]);
-
-  // Load user stats when user identifier changes
+  // Auto-connect wallet if user has Farcaster context
   useEffect(() => {
-    const loadStats = async () => {
-      if (userIdentifier) {
-        try {
-          const stats = await getUserStats(userIdentifier);
-          setUserStats(stats);
-        } catch (error) {
-          console.error('Failed to load user stats:', error);
-        }
+    if (context?.user && !connectedAddress) {
+      // In a real implementation, you'd extract the wallet address from Farcaster context
+      // For now, we'll simulate this with a mock address
+      const mockAddress = `0x${context.user.fid.toString().padStart(40, '0')}`;
+      setConnectedAddress(mockAddress);
+    }
+  }, [context, connectedAddress]);
+
+  const handleWalletConnect = async () => {
+    try {
+      const address = await connectWallet();
+      if (address) {
+        setConnectedAddress(address);
       }
-    };
-    loadStats();
-  }, [userIdentifier, refreshStats]);
-
-  // Show how to play on first visit for new users
-  useEffect(() => {
-    const hasSeenInstructions = localStorage.getItem('number-crunch-seen-instructions');
-    if (!hasSeenInstructions && userIdentifier) {
-      setShowHowToPlay(true);
-      localStorage.setItem('number-crunch-seen-instructions', 'true');
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
     }
-  }, [userIdentifier]);
+  };
 
-  const handleShare = async () => {
+  const handleSharePortfolio = async () => {
+    if (!portfolio) return;
+    
     setShareStatus('sharing');
     
     try {
-      const totalPuzzlesSolved = userStats?.total_puzzles_solved || 0;
-      const shareText = generateShareText(
-        gameState.target,
-        gameState.moves,
-        gameState.time,
-        gameState.solutionPath,
-        gameState.difficulty,
-        totalPuzzlesSolved
+      // Generate portfolio image
+      const imageUrl = await generatePortfolioImage(
+        portfolio,
+        settings.colorPalette,
+        settings.showTotalValue
       );
 
-      console.log('📤 Attempting to share solution...');
-      console.log('🔍 Is in Farcaster:', isInFarcaster);
+      const earnedBadges = getEarnedBadges();
+      const shareText = `🚀 My Monadfolio Portfolio\n\n💼 ${getVisibleAssets().length} assets${settings.showTotalValue ? ` • $${portfolio.totalValue.toLocaleString()}` : ''}\n🏆 ${earnedBadges.length} badges earned\n🎨 ${portfolio.nfts.length} NFTs\n\nBuilding on @monad 🔥\n\n#Monadfolio #Monad`;
 
       // Try Farcaster sharing first if in Farcaster
-      if (isInFarcaster && sdk && sdk.actions) {
-        console.log('🎯 Attempting Farcaster share via miniapp SDK...');
+      if (isInFarcaster && window.parent) {
         try {
           const encodedText = encodeURIComponent(shareText);
           const encodedUrl = encodeURIComponent(window.location.origin);
-          await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedUrl}`);
-          console.log('✅ Farcaster composer opened successfully');
+          window.open(`https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedUrl}`, '_blank');
           setShareStatus('success');
           setTimeout(() => setShareStatus('idle'), 3000);
           return;
-        } catch (farcasterError) {
-          console.log('❌ Farcaster SDK share failed:', farcasterError);
+        } catch (error) {
+          console.log('Farcaster share failed, trying alternatives');
         }
       }
 
       // Try Web Share API
-      if (navigator.share && navigator.canShare && navigator.canShare({ text: shareText })) {
-        console.log('📱 Using Web Share API');
+      if (navigator.share) {
         try {
           await navigator.share({
-            title: 'Number Crunch - Math Puzzle',
+            title: 'My Monadfolio Portfolio',
             text: shareText,
             url: window.location.origin
           });
-          console.log('✅ Web Share API successful');
           setShareStatus('success');
           return;
         } catch (shareError: any) {
-          console.log('❌ Web Share API failed:', shareError);
           if (shareError.name === 'AbortError') {
             setShareStatus('idle');
             return;
@@ -123,118 +113,53 @@ function GameApp() {
       }
 
       // Fallback to clipboard
-      console.log('📋 Falling back to clipboard');
-      let clipboardSuccess = false;
-      
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-          await navigator.clipboard.writeText(shareText);
-          console.log('✅ Clipboard write successful');
-          clipboardSuccess = true;
-        } catch (clipboardError) {
-          console.log('❌ Clipboard API failed:', clipboardError);
-        }
-      }
-      
-      if (!clipboardSuccess) {
-        console.log('📝 Using fallback text selection method');
-        const textArea = document.createElement('textarea');
-        textArea.value = shareText;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        textArea.setAttribute('readonly', '');
-        textArea.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-          const successful = document.execCommand('copy');
-          if (successful) {
-            console.log('✅ Fallback copy successful');
-            clipboardSuccess = true;
-          }
-        } catch (err) {
-          console.error('❌ Fallback copy failed:', err);
-        } finally {
-          document.body.removeChild(textArea);
-        }
-      }
-      
-      if (clipboardSuccess) {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        alert('Portfolio details copied to clipboard!');
         setShareStatus('success');
-        alert('🎉 Solution copied to clipboard! Share it with your friends!');
       } else {
-        console.log('📄 Using prompt as final fallback');
-        const userCopied = prompt('Copy this text to share your solution:', shareText);
-        if (userCopied !== null) {
-          setShareStatus('success');
-        } else {
-          setShareStatus('error');
-        }
+        prompt('Copy this text to share your portfolio:', shareText);
+        setShareStatus('success');
       }
     } catch (error) {
-      console.error('❌ Share failed completely:', error);
+      console.error('Share failed:', error);
       setShareStatus('error');
-      
-      const totalPuzzlesSolved = userStats?.total_puzzles_solved || 0;
-      const shareText = generateShareText(
-        gameState.target,
-        gameState.moves,
-        gameState.time,
-        gameState.solutionPath,
-        gameState.difficulty,
-        totalPuzzlesSolved
-      );
-      
-      alert('Share failed. Here\'s your solution text:\n\n' + shareText);
     }
 
     setTimeout(() => setShareStatus('idle'), 3000);
   };
 
-  const handleNewGame = async () => {
-    setStatsUpdated(false);
-    startNewGame();
-  };
+  const handleShareBadges = async () => {
+    const earnedBadges = getEarnedBadges();
+    const badgeText = earnedBadges.map(badge => `${badge.icon} ${badge.name}`).join('\n');
+    const shareText = `🏆 My Monadfolio Badges\n\n${badgeText}\n\nEarned ${earnedBadges.length} badges on @monad!\n\n#Monadfolio #Monad #Badges`;
 
-  const handleShowHelp = () => {
-    setShowHowToPlay(true);
-  };
-
-  const handleCloseHelp = () => {
-    setShowHowToPlay(false);
-  };
-
-  // Update stats when game is completed
-  useEffect(() => {
-    const updateStats = async () => {
-      if (gameState.isComplete && userIdentifier && !statsUpdated) {
-        console.log('🎯 Game completed! Updating stats...');
-        
-        try {
-          const result = await updateUserStats(userIdentifier, gameState.time, gameState.moves);
-          console.log('✅ Stats update successful:', result);
-          setStatsUpdated(true);
-          setUserStats(result);
-          setRefreshStats(prev => prev + 1);
-        } catch (error) {
-          console.error('❌ Error updating user stats:', error);
-        }
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Monadfolio Badges',
+          text: shareText,
+          url: window.location.origin
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        alert('Badge collection copied to clipboard!');
+      } else {
+        prompt('Copy this text to share your badges:', shareText);
       }
-    };
-
-    updateStats();
-  }, [gameState.isComplete, userIdentifier, gameState.time, gameState.moves, statsUpdated]);
+    } catch (error) {
+      console.error('Badge share failed:', error);
+    }
+  };
 
   // Show loading screen until SDK is ready
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading Number Crunch...</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
+          <p className="text-gray-600">Loading your Monad portfolio...</p>
           <p className="text-sm text-gray-500 mt-2">Initializing Farcaster SDK...</p>
         </div>
       </div>
@@ -247,51 +172,144 @@ function GameApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-4">
-      <div className="container mx-auto py-8">
-        <UserStats 
-          userIdentifier={userIdentifier}
-          farcasterUser={context?.user}
-          isInFarcaster={isInFarcaster}
-          refreshTrigger={refreshStats}
-        />
-        
-        {gameState.isComplete ? (
-          <div className="space-y-6">
-            <GameComplete
-              time={gameState.time}
-              moves={gameState.moves}
-              target={gameState.target}
-              difficulty={gameState.difficulty}
-              onNewGame={handleNewGame}
-              onShare={handleShare}
-              shareStatus={shareStatus}
-            />
-            <SolutionPath
-              solutionPath={gameState.solutionPath}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+              <Wallet className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-white">Monadfolio</h1>
+          </div>
+          <p className="text-purple-200 text-lg">
+            Your Monad portfolio & on-chain identity
+          </p>
+          {isInFarcaster && (
+            <div className="mt-2 inline-flex items-center space-x-2 bg-purple-800 bg-opacity-50 text-purple-200 px-3 py-1 rounded-full text-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Connected via Farcaster</span>
+            </div>
+          )}
+        </div>
+
+        {/* Wallet Connection */}
+        {!connectedAddress ? (
+          <div className="max-w-md mx-auto">
+            <WalletConnect 
+              onConnect={handleWalletConnect}
+              isInFarcaster={isInFarcaster}
+              farcasterUser={context?.user}
             />
           </div>
         ) : (
           <div className="space-y-6">
-            <GameBoard
-              gameState={gameState}
-              onNumberSelect={selectNumber}
-              onOperationSelect={selectOperation}
-              onNewGame={handleNewGame}
-              onShowHelp={handleShowHelp}
-            />
-            {gameState.solutionPath.length > 0 && (
-              <SolutionPath
-                solutionPath={gameState.solutionPath}
-              />
+            {/* Navigation Tabs */}
+            <div className="flex justify-center">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-2">
+                <div className="flex space-x-2">
+                  {[
+                    { id: 'portfolio', label: 'Portfolio', icon: Wallet },
+                    { id: 'badges', label: 'Badges', icon: Award },
+                    { id: 'news', label: 'News', icon: Newspaper }
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setActiveTab(id as any)}
+                      className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                        activeTab === id
+                          ? 'bg-white text-purple-700 shadow-lg'
+                          : 'text-white hover:bg-white hover:bg-opacity-20'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="max-w-4xl mx-auto">
+              {activeTab === 'portfolio' && portfolio && (
+                <PortfolioSnapshot
+                  portfolio={portfolio}
+                  settings={settings}
+                  onSettingsChange={updateSettings}
+                  onToggleAsset={toggleAssetVisibility}
+                  onShare={handleSharePortfolio}
+                  onRefresh={refreshPortfolio}
+                  loading={portfolioLoading}
+                />
+              )}
+
+              {activeTab === 'badges' && (
+                <BadgeCollection
+                  badges={badges}
+                  onShareBadges={handleShareBadges}
+                />
+              )}
+
+              {activeTab === 'news' && (
+                <MonadNews
+                  news={news}
+                  loading={newsLoading}
+                  onRefresh={refreshNews}
+                />
+              )}
+            </div>
+
+            {/* Loading States */}
+            {portfolioLoading && activeTab === 'portfolio' && (
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading your Monad portfolio...</p>
+                </div>
+              </div>
             )}
+
+            {/* Error States */}
+            {portfolioError && activeTab === 'portfolio' && (
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+                  <div className="text-red-600 mb-2">⚠️ Error Loading Portfolio</div>
+                  <p className="text-red-700 mb-4">{portfolioError}</p>
+                  <button
+                    onClick={refreshPortfolio}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {newsError && activeTab === 'news' && (
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+                  <div className="text-red-600 mb-2">⚠️ Error Loading News</div>
+                  <p className="text-red-700 mb-4">{newsError}</p>
+                  <button
+                    onClick={refreshNews}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Connected Wallet Info */}
+            <div className="text-center">
+              <div className="inline-flex items-center space-x-2 bg-white bg-opacity-10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>Connected: {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}</span>
+              </div>
+            </div>
           </div>
         )}
-        
-        <HowToPlay 
-          isOpen={showHowToPlay} 
-          onClose={handleCloseHelp} 
-        />
       </div>
     </div>
   );
@@ -300,7 +318,7 @@ function GameApp() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <GameApp />
+      <MonadfolioApp />
     </QueryClientProvider>
   );
 }
