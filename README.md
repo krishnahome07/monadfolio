@@ -2,7 +2,7 @@
 
 A beautiful, production-ready Farcaster mini-app that transforms your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn achievement badges, and stay updated with the latest Monad ecosystem news.
 
-![Monadfolio App](https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop&crop=center)
+![Monadfolio App](https://monadfolio.vercel.app/appicon.png)
 
 ## 🎯 App Overview
 

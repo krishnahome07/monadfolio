@@ -2,17 +2,17 @@
   "frame": {
     "name": "Monadfolio",
     "version": "1",
-    "iconUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=512&h=512&fit=crop&crop=center",
+    "iconUrl": "https://monadfolio.vercel.app/appicon.png",
     "homeUrl": "https://monadfolio.vercel.app",
-    "imageUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=512&h=512&fit=crop&crop=center",
+    "imageUrl": "https://monadfolio.vercel.app/appicon.png",
     "buttonTitle": "OPEN THE APP",
-    "splashImageUrl": "https://images.unsplash.com/photo-1642104704074-907c0698cbd9?w=800&h=600&fit=crop&crop=center",
+    "splashImageUrl": "https://monadfolio.vercel.app/splash.jpg",
     "splashBackgroundColor": "#6B46C1",
     "webhookUrl": "https://monadfolio.vercel.app/api/webhook",
     "subtitle": "Monad Portfolio & Identity",
     "description": "Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated with Monad news.",
     "screenshotUrls": [
-      "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop&crop=center"
+      "https://monadfolio.vercel.app/appicon.png"
     ],
     "primaryCategory": "finance",
     "tags": [
@@ -22,11 +22,11 @@
       "social",
       "defi"
     ],
-    "heroImageUrl": "https://raw.githubusercontent.com/smbalaji27/appIcons/main/appicon.jpg",
+    "heroImageUrl": "https://monadfolio.vercel.app/appicon.png",
     "tagline": "Your on-chain identity, visualized",
     "ogTitle": "Monad Portfolio",
     "ogDescription": "Transform your Monad wallet into a social, shareable on-chain identity",
-    "ogImageUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop&crop=center",
+    "ogImageUrl": "https://monadfolio.vercel.app/appicon.png",
     "castShareUrl": "https://monadfolio.vercel.app"
   },
   "accountAssociation": {
