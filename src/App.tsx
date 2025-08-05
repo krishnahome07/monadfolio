@@ -226,8 +226,8 @@ function MonadfolioApp() {
           <div className="space-y-6">
             {/* Navigation Tabs */}
             <div className="flex justify-center">
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-2">
-                <div className="flex space-x-2">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-1 w-full max-w-md">
+                <div className="flex space-x-1">
                   {[
                     { id: 'portfolio', label: 'Portfolio', icon: Wallet },
                     { id: 'badges', label: 'Badges', icon: Award },
@@ -236,14 +236,14 @@ function MonadfolioApp() {
                     <button
                       key={id}
                       onClick={() => setActiveTab(id as any)}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                      className={`flex items-center justify-center space-x-1 px-3 py-2 rounded-xl font-medium text-sm transition-all duration-200 flex-1 ${
                         activeTab === id
                           ? 'bg-white text-purple-700 shadow-lg'
                           : 'text-white hover:bg-white hover:bg-opacity-20'
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span>{label}</span>
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{label}</span>
                     </button>
                   ))}
                 </div>
