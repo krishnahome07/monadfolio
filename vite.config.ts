@@ -25,9 +25,27 @@ export default defineConfig({
           .replace('__TWITTER_DESCRIPTION__', APP_CONFIG.description)
           .replace('__TWITTER_IMAGE__', APP_CONFIG.bgImage);
       }
+    },
+    {
+      name: 'inject-farcaster-config',
+      generateBundle() {
+        // Read and transform farcaster.json
+        const fs = require('fs');
+        const path = require('path');
+        
+        const farcasterPath = path.resolve(__dirname, 'public/.well-known/farcaster.json');
+        if (fs.existsSync(farcasterPath)) {
+          let content = fs.readFileSync(farcasterPath, 'utf-8');
+          content = content
+            .replace(/__APP_ICON__/g, APP_CONFIG.appIcon)
+            .replace(/__SPLASH_BG_COLOR__/g, APP_CONFIG.splashBackgroundColor);
+          
+          fs.writeFileSync(farcasterPath, content);
+        }
+      }
     }
   ],
   optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
+    exclude: ['lucide-react']
+  }
 });
