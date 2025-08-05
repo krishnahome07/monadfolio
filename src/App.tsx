@@ -9,6 +9,7 @@ import { useFarcasterSDK } from './hooks/useFarcasterSDK';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useMonadNews } from './hooks/useMonadNews';
 import { connectWallet, generatePortfolioImage } from './utils/monadApi';
+import { APP_CONFIG } from './utils/appConfig';
 import { Wallet, Award, Newspaper, Settings, Share2 } from 'lucide-react';
 
 const queryClient = new QueryClient();

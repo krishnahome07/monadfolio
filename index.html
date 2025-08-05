@@ -36,23 +36,23 @@
     ">
     
     <!-- Farcaster Mini App Configuration -->
-    <meta name="fc:miniapp" content='{"version":"next","imageUrl":"https://monadfolio.vercel.app/bgimage.jpg","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_miniapp","name":"Monadfolio","url":"https://monadfolio.vercel.app","splashImageUrl":"https://monadfolio.vercel.app/appicon.png","splashBackgroundColor":"#0EA5E9"}}}' />
+    <meta name="fc:miniapp" content='{"version":"next","imageUrl":"%VITE_BG_IMAGE_URL%","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_miniapp","name":"Monadfolio","url":"%VITE_APP_BASE_URL%","splashImageUrl":"%VITE_APP_ICON_URL%","splashBackgroundColor":"%VITE_SPLASH_BG_COLOR%"}}}' />
     
     <!-- Backward compatibility for older Farcaster clients -->
-    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://monadfolio.vercel.app/bgimage.jpg","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_frame","name":"Monadfolio","url":"https://monadfolio.vercel.app","splashImageUrl":"https://monadfolio.vercel.app/appicon.png","splashBackgroundColor":"#0EA5E9"}}}' />
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"%VITE_BG_IMAGE_URL%","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_frame","name":"Monadfolio","url":"%VITE_APP_BASE_URL%","splashImageUrl":"%VITE_APP_ICON_URL%","splashBackgroundColor":"%VITE_SPLASH_BG_COLOR%"}}}' />
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Monadfolio - Your Monad Portfolio and Identity" />
     <meta property="og:description" content="Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated." />
-    <meta property="og:image" content="https://monadfolio.vercel.app/bgimage.jpg" />
+    <meta property="og:image" content="%VITE_BG_IMAGE_URL%" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://monadfolio.vercel.app" />
+    <meta property="og:url" content="%VITE_APP_BASE_URL%" />
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Monadfolio - Your Monad Portfolio & Identity" />
     <meta name="twitter:description" content="Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated." />
-    <meta name="twitter:image" content="https://monadfolio.vercel.app/bgimage.jpg" />
+    <meta name="twitter:image" content="%VITE_BG_IMAGE_URL%" />
   </head>
   <body>
     <div id="root"></div>

@@ -2,17 +2,17 @@
   "frame": {
     "name": "Monadfolio",
     "version": "1",
-    "iconUrl": "https://monadfolio.vercel.app/appicon.png",
-    "homeUrl": "https://monadfolio.vercel.app",
-    "imageUrl": "https://monadfolio.vercel.app/appicon.png",
+    "iconUrl": "%VITE_APP_ICON_URL%",
+    "homeUrl": "%VITE_APP_BASE_URL%",
+    "imageUrl": "%VITE_APP_ICON_URL%",
     "buttonTitle": "OPEN THE APP",
-    "splashImageUrl": "https://monadfolio.vercel.app/bgimage.jpg",
-    "splashBackgroundColor": "#0EA5E9",
-    "webhookUrl": "https://monadfolio.vercel.app/api/webhook",
+    "splashImageUrl": "%VITE_BG_IMAGE_URL%",
+    "splashBackgroundColor": "%VITE_SPLASH_BG_COLOR%",
+    "webhookUrl": "%VITE_APP_BASE_URL%/api/webhook",
     "subtitle": "Monad Portfolio and Identity",
     "description": "Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated with Monad news.",
     "screenshotUrls": [
-      "https://monadfolio.vercel.app/appicon.png"
+      "%VITE_APP_ICON_URL%"
     ],
     "primaryCategory": "finance",
     "tags": [
@@ -22,12 +22,12 @@
       "social",
       "defi"
     ],
-    "heroImageUrl": "https://monadfolio.vercel.app/appicon.png",
+    "heroImageUrl": "%VITE_APP_ICON_URL%",
     "tagline": "Your on-chain identity",
     "ogTitle": "Monad Portfolio",
     "ogDescription": "Transform your Monad wallet into a social, shareable on-chain identity",
-    "ogImageUrl": "https://monadfolio.vercel.app/appicon.png",
-    "castShareUrl": "https://monadfolio.vercel.app"
+    "ogImageUrl": "%VITE_APP_ICON_URL%",
+    "castShareUrl": "%VITE_APP_BASE_URL%"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjE3MzA4LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4MTMwOERiMTU4QmMwNDJmQTdDRDQyNTBDOUQwNUNmODEwNzk0MjFlNyJ9",
