@@ -6,7 +6,7 @@
     "homeUrl": "https://monadfolio.vercel.app",
     "imageUrl": "https://monadfolio.vercel.app/appicon.png",
     "buttonTitle": "OPEN THE APP",
-    "splashImageUrl": "https://monadfolio.vercel.app/bgimage.jpg",
+    "splashImageUrl": "https://monadfolio.vercel.app/appicon.png",
     "splashBackgroundColor": "#E0F2FE",
     "webhookUrl": "https://monadfolio.vercel.app/api/webhook",
     "subtitle": "Monad Portfolio and Identity",
