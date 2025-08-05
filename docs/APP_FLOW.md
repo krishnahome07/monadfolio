@@ -1,16 +1,16 @@
-# 🔄 Number Crunch - App Flow Overview
+# 🔄 Monadfolio - App Flow Overview
 
-This document provides a comprehensive overview of how the Number Crunch application initializes, loads, and operates. It's designed for developers who need to understand the application architecture and flow.
+This document provides a comprehensive overview of how the Monadfolio application initializes, loads, and operates. It's designed for developers who need to understand the application architecture and flow.
 
 ## 📋 Table of Contents
 
 1. [Initial Load Sequence](#1-initial-load-sequence)
 2. [File Loading Order](#2-file-loading-order)
-3. [Initialization Flow](#3-initialization-flow-in-gameapp)
+3. [Initialization Flow](#3-initialization-flow-in-monadfolioapp)
 4. [Component Rendering Flow](#4-component-rendering-flow)
 5. [Key Components Called Initially](#5-key-components-called-initially)
 6. [Database Integration](#6-database-integration)
-7. [Tutorial System](#7-tutorial-system)
+7. [Farcaster Integration](#7-farcaster-integration)
 8. [State Management](#8-state-management)
 9. [Environment Configuration](#9-environment-configuration)
 10. [Responsive Flow](#10-responsive-flow)
@@ -24,7 +24,7 @@ This document provides a comprehensive overview of how the Number Crunch applica
 index.html → src/main.tsx → src/App.tsx → Components
 ```
 
-The application follows a standard React initialization pattern with additional Farcaster miniapp integration.
+The application follows a standard React initialization pattern with Farcaster miniapp integration for portfolio visualization and social features.
 
 ---
 
@@ -37,17 +37,17 @@ The application follows a standard React initialization pattern with additional 
 ### **Main Application:**
 - **`src/App.tsx`** - Main application component with two wrapper functions:
   - `App()` - Provides React Query context
-  - `GameApp()` - Contains all the game logic and state management
+  - `MonadfolioApp()` - Contains all the portfolio logic and state management
 
 ---
 
-## 3. **Initialization Flow in GameApp()**
+## 3. **Initialization Flow in MonadfolioApp()**
 
 ### **Hook Initialization:**
 ```typescript
-const { gameState, startNewGame, selectNumber, selectOperation } = useGame();
 const { context, isReady, isInFarcaster } = useFarcasterSDK();
-const [showHowToPlay, setShowHowToPlay] = useState(false);
+const { portfolio, badges, loading, error, settings, updateSettings } = usePortfolio(connectedAddress);
+const { news, loading: newsLoading, error: newsError } = useMonadNews();
 ```
 
 ### **Detailed Initialization Steps:**
@@ -57,18 +57,20 @@ const [showHowToPlay, setShowHowToPlay] = useState(false);
    - Calls `sdk.actions.ready()` to hide the splash screen
    - Determines if running inside Farcaster or as standalone web app
 
-2. **User Identification:**
-   - Creates stable user identifier (Farcaster user or guest ID)
-   - Loads user stats from Supabase database
+2. **Wallet Connection:**
+   - Auto-connects wallet if user has Farcaster context
+   - Falls back to manual wallet connection or demo mode
+   - Creates stable user identifier for portfolio tracking
 
-3. **Game Initialization:**
-   - `src/hooks/useGame.ts` automatically starts a new game on mount
-   - Calls `generatePuzzle()` from `src/utils/gameLogic.ts`
+3. **Portfolio Initialization:**
+   - `src/hooks/usePortfolio.ts` loads portfolio data when wallet is connected
+   - Fetches assets, NFTs, and calculates badge eligibility
+   - Loads user settings from localStorage
 
-4. **Tutorial System Setup:**
-   - Checks localStorage for `'number-crunch-seen-instructions'`
-   - Shows tutorial popup automatically for first-time users
-   - Sets localStorage flag to prevent repeated automatic displays
+4. **News Feed Setup:**
+   - `src/hooks/useMonadNews.ts` fetches latest Monad ecosystem news
+   - Categorizes news into official, ecosystem, and general news
+   - Sets up auto-refresh every 30 minutes
 
 ---
 
@@ -88,46 +90,51 @@ if (!isAppEnabled) {
 }
 ```
 
-### **Main Game Interface:**
+### **Main Application Interface:**
 ```typescript
-<UserStats /> // Always shown at top
-{gameState.isComplete ? (
-  <GameComplete /> + <SolutionPath />
+{!connectedAddress ? (
+  <WalletConnect />
 ) : (
-  <GameBoard /> + <SolutionPath />
+  <>
+    <NavigationTabs />
+    {activeTab === 'portfolio' && <PortfolioSnapshot />}
+    {activeTab === 'badges' && <BadgeCollection />}
+    {activeTab === 'news' && <MonadNews />}
+  </>
 )}
-<HowToPlay /> // Tutorial popup (conditional rendering)
 ```
 
 ---
 
 ## 5. **Key Components Called Initially**
 
-### **1. `src/components/UserStats.tsx`**
-- **Purpose**: Displays user profile and statistics
-- **Data Source**: Loads data from Supabase via `src/lib/supabase.ts`
-- **Behavior**: Shows different UI based on Farcaster vs guest user
+### **1. `src/components/WalletConnect.tsx`**
+- **Purpose**: Handles wallet connection and user onboarding
+- **Features**: Auto-connect, manual address entry, demo mode
+- **Behavior**: Shows different UI based on Farcaster vs standalone usage
 
-### **2. `src/components/GameBoard.tsx`**
-- **Purpose**: Main game interface with numbers and operations
-- **Functionality**: Handles user interactions (number selection, operations)
-- **State**: Manages selected numbers and operations
+### **2. `src/components/PortfolioSnapshot.tsx`**
+- **Purpose**: Main portfolio visualization with colored blocks
+- **Functionality**: Asset visualization, privacy controls, sharing
+- **State**: Manages portfolio settings and asset visibility
 
-### **3. `src/utils/gameLogic.ts`**
-- **Purpose**: Core game logic and puzzle generation
+### **3. `src/components/BadgeCollection.tsx`**
+- **Purpose**: Achievement system displaying earned and available badges
+- **Features**: Category filtering, progress tracking, social sharing
+- **Data**: Calculates badge eligibility based on portfolio and activity
+
+### **4. `src/components/MonadNews.tsx`**
+- **Purpose**: Curated news feed from Monad ecosystem
+- **Features**: Category filtering, external link handling, refresh functionality
+- **Behavior**: Auto-refreshes and categorizes news content
+
+### **5. `src/utils/monadApi.ts`**
+- **Purpose**: Core API integration and data fetching
 - **Key Functions**:
-  - `generatePuzzle()` - Creates solvable puzzles
-  - `performOperation()` - Handles mathematical operations
-  - `applyOperation()` - Updates game state after operations
-
-### **4. `src/components/HowToPlay.tsx`**
-- **Purpose**: Interactive tutorial popup for new users
-- **Features**: 
-  - Compact, mobile-friendly design
-  - Step-by-step game instructions
-  - Example walkthrough
-  - Prominent close button
-- **Behavior**: Shows automatically for new users, accessible via button for all users
+  - `fetchPortfolio()` - Retrieves wallet portfolio data
+  - `fetchUserBadges()` - Calculates achievement badges
+  - `fetchMonadNews()` - Gets latest ecosystem news
+  - `connectWallet()` - Handles wallet connectivity
 
 ---
 
@@ -135,72 +142,63 @@ if (!isAppEnabled) {
 
 ### **Supabase Configuration:**
 - **File**: `src/lib/supabase.ts`
-- **Schema**: Defined in `supabase/migrations/20250702090608_black_frost.sql`
-- **Operations**: Automatically creates/updates user stats when games are completed
+- **Schema**: User statistics and portfolio tracking
+- **Operations**: Currently used for user stats, expandable for portfolio caching
 
 ### **Database Operations:**
 ```typescript
-// Get user statistics
+// Get user statistics (if needed for future features)
 const stats = await getUserStats(userIdentifier);
 
-// Update stats after game completion
-const result = await updateUserStats(userIdentifier, time, moves);
+// Update user activity (for badge calculations)
+const result = await updateUserStats(userIdentifier, activity);
 ```
 
 ### **Data Flow:**
-1. User completes puzzle
-2. `updateUserStats()` called with game results
-3. Database calculates new averages and best times
-4. UI refreshes with updated statistics
+1. User connects wallet
+2. Portfolio data fetched from blockchain
+3. Badge eligibility calculated
+4. Settings stored in localStorage
+5. Optional database sync for cross-device features
 
 ---
 
-## 7. **Tutorial System**
+## 7. **Farcaster Integration**
 
-### **First-Time User Detection:**
+### **Miniapp Features:**
+- **Native Sharing**: Direct integration with Farcaster composer
+- **User Context**: Access to Farcaster user profile and social graph
+- **Frame Compatibility**: Backward compatibility with Farcaster frames
+
+### **Social Features:**
 ```typescript
-useEffect(() => {
-  const hasSeenInstructions = localStorage.getItem('number-crunch-seen-instructions');
-  if (!hasSeenInstructions && userIdentifier) {
-    setShowHowToPlay(true);
-    localStorage.setItem('number-crunch-seen-instructions', 'true');
-  }
-}, [userIdentifier]);
+// Portfolio sharing
+const shareText = `🚀 My Monadfolio Portfolio\n\n💼 ${assets.length} assets • $${totalValue}\n🏆 ${badges.length} badges earned`;
+
+// Badge sharing
+const badgeText = earnedBadges.map(badge => `${badge.icon} ${badge.name}`).join('\n');
 ```
-
-### **Tutorial Flow:**
-1. **New User Visit**: No localStorage flag → Popup shows automatically
-2. **Flag Setting**: Immediately marks as seen to prevent re-display
-3. **Manual Access**: "How to Play" button available for all users
-4. **Persistence**: localStorage remembers preference across sessions
-
-### **User Experience Benefits:**
-- **Non-intrusive**: Only shows once automatically
-- **Always accessible**: Manual button always available
-- **Device-specific**: Each device/browser tracks separately
-- **Immediate feedback**: Clear instructions with examples
 
 ---
 
 ## 8. **State Management**
 
-### **Game State (`useGame` hook):**
-- **Numbers Array**: Available numbers for operations
-- **Target**: Goal number to reach
-- **Moves & Time**: Performance tracking
-- **Selected Numbers**: Currently selected numbers for operations
-- **Solution Path**: History of all operations performed
-- **Game Status**: Playing, complete, etc.
+### **Portfolio State (`usePortfolio` hook):**
+- **Assets Array**: Token balances and values
+- **NFT Collection**: Digital collectibles
+- **Badge System**: Achievement tracking
+- **Settings**: Privacy and display preferences
+- **Loading States**: UI feedback during data fetching
 
-### **User State:**
-- **Farcaster Context**: User info if in Farcaster environment
-- **User Statistics**: Persistent stats from database
-- **Tutorial State**: Local storage for tutorial display preferences
-- **Guest Identification**: Stable ID for non-Farcaster users
+### **Application State:**
+- **Wallet Connection**: Connected address and user context
+- **Active Tab**: Current view (portfolio, badges, news)
+- **Farcaster Context**: User info and social features
+- **News Feed**: Latest ecosystem updates
 
 ### **State Flow:**
 ```
-User Action → Hook Updates → Component Re-render → Database Sync (if needed)
+User Action → Hook Updates → Component Re-render → Blockchain/API Sync
 ```
 
 ---
@@ -209,8 +207,8 @@ User Action → Hook Updates → Component Re-render → Database Sync (if neede
 
 ### **Required Environment Variables:**
 - **`VITE_APP_ENABLED`** - Controls maintenance mode (default: true)
-- **`VITE_SUPABASE_URL`** - Database connection URL
-- **`VITE_SUPABASE_ANON_KEY`** - Database authentication key
+- **`VITE_SUPABASE_URL`** - Database connection URL (optional)
+- **`VITE_SUPABASE_ANON_KEY`** - Database authentication key (optional)
 
 ### **Configuration Validation:**
 The app validates environment variables and gracefully degrades:
@@ -225,20 +223,19 @@ The app validates environment variables and gracefully degrades:
 ### **Context-Aware Behavior:**
 
 #### **In Farcaster Environment:**
-- Shows Farcaster user profile and info
-- Uses miniapp SDK for sharing (`sdk.actions.openUrl()`)
-- Enhanced social features
+- Shows Farcaster user profile and social features
+- Uses miniapp SDK for native sharing
+- Enhanced social engagement features
 
 #### **Standalone Web Application:**
-- Uses guest mode with local storage
+- Uses manual wallet connection
 - Falls back to Web Share API or clipboard
 - Full functionality without Farcaster
 
-#### **No Database Connection:**
-- Game still fully functional
-- Stats stored locally
-- Tutorial system works independently
-- No persistent cross-device sync
+#### **Demo Mode:**
+- Portfolio visualization with mock data
+- All features accessible for exploration
+- No persistent data storage
 
 ---
 
@@ -246,13 +243,15 @@ The app validates environment variables and gracefully degrades:
 
 ### **Graceful Degradation:**
 - **SDK Initialization Fails**: App loads normally without Farcaster features
-- **Database Unavailable**: Local storage fallback for stats
-- **Share Failures**: Multiple fallback methods (Web Share API → Clipboard → Manual copy)
+- **Wallet Connection Issues**: Demo mode with sample portfolio
+- **API Failures**: Cached data and retry mechanisms
+- **Share Failures**: Multiple fallback methods
 
 ### **Error Boundaries:**
 - Try-catch blocks around all async operations
 - Console logging for debugging
 - User-friendly error messages
+- Automatic retry for transient failures
 
 ---
 
@@ -260,22 +259,22 @@ The app validates environment variables and gracefully degrades:
 
 ### **Key Files for Debugging:**
 - **App initialization issues**: `src/hooks/useFarcasterSDK.ts`
-- **Game logic problems**: `src/utils/gameLogic.ts`
-- **Tutorial display issues**: `src/components/HowToPlay.tsx`
+- **Portfolio loading problems**: `src/utils/monadApi.ts`
+- **Wallet connection issues**: `src/components/WalletConnect.tsx`
 - **Database issues**: `src/lib/supabase.ts`
-- **State management**: `src/hooks/useGame.ts`
+- **State management**: `src/hooks/usePortfolio.ts`
 
 ### **Common Development Scenarios:**
-1. **Adding new game features**: Modify `useGame.ts` and `gameLogic.ts`
+1. **Adding new portfolio features**: Modify `usePortfolio.ts` and `monadApi.ts`
 2. **Database schema changes**: Create new migration in `supabase/migrations/`
-3. **Tutorial content updates**: Edit `HowToPlay.tsx` component
-3. **UI updates**: Components are modular and can be updated independently
-4. **Farcaster integration**: All SDK logic is contained in `useFarcasterSDK.ts`
+3. **New badge types**: Update badge calculation logic in `fetchUserBadges()`
+4. **UI updates**: Components are modular and can be updated independently
+5. **Farcaster integration**: All SDK logic is contained in `useFarcasterSDK.ts`
 
 ### **Performance Considerations:**
-- Game state updates are optimized to prevent unnecessary re-renders
-- Database operations are batched and cached
-- Tutorial popup uses conditional rendering for optimal performance
+- Portfolio data is cached and refreshed on demand
+- News feed auto-refreshes every 30 minutes
+- Settings are stored locally for instant loading
 - Farcaster SDK initialization is non-blocking
 
 ---
@@ -284,11 +283,12 @@ The app validates environment variables and gracefully degrades:
 
 This architecture provides:
 - **Modularity**: Each component has a single responsibility
-- **Scalability**: Easy to add new features without breaking existing functionality
-- **User-Friendly**: Smart onboarding that doesn't overwhelm returning users
+- **Scalability**: Easy to add new portfolio features and badge types
+- **User-Friendly**: Seamless onboarding for both Farcaster and web users
 - **Reliability**: Graceful degradation when services are unavailable
 - **Maintainability**: Clear separation of concerns and well-documented code
 - **Cross-Platform**: Works seamlessly in Farcaster and standalone environments
+- **Social Integration**: Native sharing and community features
 
 ---
 
