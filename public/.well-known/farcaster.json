@@ -7,7 +7,7 @@
     "imageUrl": "https://monadfolio.vercel.app/appicon.png",
     "buttonTitle": "OPEN THE APP",
     "splashImageUrl": "https://monadfolio.vercel.app/bgimage.jpg",
-    "splashBackgroundColor": "#0EA5E9",
+    "splashBackgroundColor": "#E0F2FE",
     "webhookUrl": "https://monadfolio.vercel.app/api/webhook",
     "subtitle": "Monad Portfolio and Identity",
     "description": "Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated with Monad news.",
