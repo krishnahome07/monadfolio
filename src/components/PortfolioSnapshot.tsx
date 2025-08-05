@@ -179,22 +179,26 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
 
       {/* Portfolio Visualization */}
       <div className="p-6">
-        <div className="grid grid-cols-4 gap-2 h-48">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 min-h-[200px]">
           {visibleAssets.map((asset, index) => {
             const size = getAssetSize(asset);
             const color = colors[index % colors.length];
-            const gridSpan = Math.ceil(size / 25); // Convert percentage to grid spans
+            const heightPercentage = Math.max(size * 2, 30); // Ensure minimum height
             
             return (
               <div
                 key={asset.symbol}
-                className={`rounded-lg flex flex-col justify-center items-center text-white font-semibold transition-all duration-300 hover:scale-105 cursor-pointer col-span-${Math.min(gridSpan, 4)}`}
-                style={{ backgroundColor: color, minHeight: `${Math.max(size, 20)}%` }}
+                className="rounded-lg flex flex-col justify-center items-center text-white font-semibold transition-all duration-300 hover:scale-105 cursor-pointer p-3"
+                style={{ 
+                  backgroundColor: color, 
+                  minHeight: `${heightPercentage}px`,
+                  height: `${Math.max(heightPercentage, 80)}px`
+                }}
                 title={`${asset.name}: $${asset.value.toLocaleString()} (${size.toFixed(1)}%)`}
               >
-                <div className="text-lg font-bold">{asset.symbol}</div>
-                <div className="text-sm opacity-90">${asset.value.toLocaleString()}</div>
-                <div className={`text-xs ${asset.change24h >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                <div className="text-base md:text-lg font-bold text-center">{asset.symbol}</div>
+                <div className="text-xs md:text-sm opacity-90 text-center">${asset.value.toLocaleString()}</div>
+                <div className={`text-xs ${asset.change24h >= 0 ? 'text-green-200' : 'text-red-200'} text-center`}>
                   {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(1)}%
                 </div>
               </div>
