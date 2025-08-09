@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Wallet, Users, Search } from 'lucide-react';
 import { validateMonadAddress } from '../utils/monadApi';
+import { validateMonadAddress } from '../utils/monadApi';
 import type { Context } from '@farcaster/frame-core';
 
 interface WalletConnectProps {
@@ -18,7 +19,8 @@ interface WalletConnectProps {
 export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
   onWalletConnect,
-  isInFarcaster,
+  isConnecting,
+  error: connectionError
   farcasterUser,
   isConnected,
   isConnecting,
@@ -27,6 +29,40 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   onSwitchToMonad
 }) => {
   const [manualAddress, setManualAddress] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+
+  const handleManualConnect = async () => {
+    setError(null);
+    setIsValidating(true);
+    
+    if (!manualAddress.trim()) {
+      setError('Please enter a wallet address');
+      setIsValidating(false);
+      return;
+    }
+
+    if (!validateMonadAddress(manualAddress)) {
+      setError('Please enter a valid Monad wallet address');
+      setIsValidating(false);
+      return;
+    }
+
+    try {
+      // Call the onConnect function to trigger portfolio loading
+      onConnect(manualAddress.trim());
+    } catch (err) {
+      setError('Failed to connect to address');
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleDemoAddress = () => {
+    const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
+    setManualAddress(demoAddress);
+    onConnect(demoAddress);
+  };
   const [error, setError] = useState<string | null>(null);
 
   const handleManualConnect = async () => {
@@ -153,18 +189,31 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             type="text"
             value={manualAddress}
             onChange={(e) => setManualAddress(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleManualConnect()}
             placeholder="0x1234567890abcdef1234567890abcdef12345678"
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
           />
           <button
             onClick={handleManualConnect}
+            disabled={isValidating}
+            onClick={handleManualConnect}
             className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center space-x-2"
           >
-            <Search className="w-4 h-4" />
-            <span>View Portfolio</span>
+            {isValidating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Validating...</span>
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4" />
+                <span>View Portfolio</span>
+              </>
+            )}
           </button>
           
           <button
+            onClick={handleDemoAddress}
             onClick={() => {
               const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
               setManualAddress(demoAddress);
@@ -174,6 +223,13 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             📝 Fill Demo Address
           </button>
         </div>
+
+        {/* Error Display */}
+        {(error || connectionError) && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="text-red-800 text-sm">{error || connectionError}</div>
+          </div>
+        )}
 
         {/* Error Display */}
         {error && (

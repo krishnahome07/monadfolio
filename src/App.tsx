@@ -22,6 +22,7 @@ function MonadfolioApp() {
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [manualAddress, setManualAddress] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const connectedAddress = address || manualAddress;
 
@@ -37,6 +38,17 @@ function MonadfolioApp() {
   } = usePortfolio(connectedAddress, context?.user);
 
   const { news, loading: newsLoading, error: newsError, refreshNews } = useMonadNews();
+
+  const handleManualConnect = (inputAddress: string) => {
+    setConnectionError(null);
+    try {
+      console.log('🔍 Connecting to manual address:', inputAddress);
+      setManualAddress(inputAddress);
+    } catch (error) {
+      console.error('❌ Failed to connect to address:', error);
+      setConnectionError('Failed to connect to the provided address');
+    }
+  };
 
   const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
   const isAppEnabled = appEnabledEnv !== 'false';
@@ -121,12 +133,13 @@ function MonadfolioApp() {
         {!connectedAddress ? (
           <div className="max-w-md mx-auto">
             <WalletConnect 
-              onConnect={setManualAddress}
+              onConnect={handleManualConnect}
               onWalletConnect={connectWallet}
               isInFarcaster={isInFarcaster}
               farcasterUser={context?.user}
               isConnected={isConnected}
               isConnecting={isConnecting}
+              error={connectionError}
               walletAddress={address}
               isOnMonad={isOnMonad}
               onSwitchToMonad={switchToMonad}
