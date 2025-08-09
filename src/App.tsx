@@ -79,25 +79,15 @@ function MonadfolioApp() {
     }
   };
 
-  if (!isReady || (isInFarcaster && isConnecting)) {
+  if (!isReady) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
           <p className="text-gray-600">
-            {isInFarcaster && isConnecting ? 'Connecting your Farcaster wallet...' : 'Loading Monadfolio...'}
+            Loading Monadfolio...
           </p>
-          {isInFarcaster && context?.user && (
-            <div className="mt-4 flex items-center justify-center space-x-2">
-              {context.user.pfpUrl && (
-                <img src={context.user.pfpUrl} alt="Profile" className="w-8 h-8 rounded-full" />
-              )}
-              <span className="text-sm text-purple-600">
-                {context.user.displayName || context.user.username || `User ${context.user.fid}`}
-              </span>
-            </div>
-          )}
         </div>
       </div>
     );
