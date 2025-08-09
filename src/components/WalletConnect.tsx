@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Wallet, Users, Search } from 'lucide-react';
 import { validateMonadAddress } from '../utils/monadApi';
-import { validateMonadAddress } from '../utils/monadApi';
 import type { Context } from '@farcaster/frame-core';
 
 interface WalletConnectProps {
