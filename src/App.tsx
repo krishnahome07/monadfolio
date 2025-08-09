@@ -99,14 +99,23 @@ function MonadfolioApp() {
         settings.showTotalValue
       );
       
-      setMintResult(result);
-      setMintingStatus('success');
-      
-      // Reset status after 5 seconds
-      setTimeout(() => {
-        setMintingStatus('idle');
-        setMintResult(null);
-      }, 5000);
+      if (result.success) {
+        setMintResult(result);
+        setMintingStatus('success');
+        
+        // Auto-share to Farcaster after successful mint
+        if (result.txHash && result.tokenId) {
+          await handleShareMintedNFT(result.txHash, result.tokenId);
+        }
+        
+        // Reset status after 5 seconds
+        setTimeout(() => {
+          setMintingStatus('idle');
+          setMintResult(null);
+        }, 5000);
+      } else {
+        throw new Error(result.error || 'Minting failed');
+      }
     } catch (error) {
       console.error('❌ NFT minting failed:', error);
       setMintingStatus('error');
@@ -115,6 +124,48 @@ function MonadfolioApp() {
       setTimeout(() => {
         setMintingStatus('idle');
       }, 3000);
+    }
+  };
+
+  const handleShareMintedNFT = async (txHash: string, tokenId: string) => {
+    try {
+      const earnedBadges = getEarnedBadges();
+      const shareText = `🎨 Just minted my Monadfolio as an NFT! 
+
+💼 Portfolio: ${getVisibleAssets().length} assets${settings.showTotalValue ? ` • $${portfolio?.totalValue.toLocaleString()}` : ''}
+🏆 Badges: ${earnedBadges.length} earned
+🎨 NFT: Token #${tokenId}
+🔗 Tx: ${txHash.slice(0, 10)}...
+
+Built on @monad testnet 🚀
+
+#Monadfolio #MonadNFT #OnChainIdentity`;
+
+      // Try Farcaster sharing first if in Farcaster
+      if (isInFarcaster && window.parent) {
+        try {
+          const encodedText = encodeURIComponent(shareText);
+          const encodedUrl = encodeURIComponent(`https://explorer.testnet1.monad.xyz/tx/${txHash}`);
+          window.open(`https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedUrl}`, '_blank');
+          return;
+        } catch (error) {
+          console.log('Farcaster share failed, trying alternatives');
+        }
+      }
+
+      // Fallback to Web Share API or clipboard
+      if (navigator.share) {
+        await navigator.share({
+          title: 'My Monadfolio NFT',
+          text: shareText,
+          url: `https://explorer.testnet1.monad.xyz/tx/${txHash}`
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        alert('NFT details copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Failed to share minted NFT:', error);
     }
   };
 
@@ -374,11 +425,12 @@ function MonadfolioApp() {
                 <div className="mt-4 max-w-md mx-auto bg-green-50 border border-green-200 rounded-xl p-4">
                   <div className="text-green-800 font-semibold mb-2">🎉 NFT Minted Successfully!</div>
                   <div className="text-sm text-green-700 space-y-1">
+                    <div>Network: Monad Testnet</div>
                     <div>Token ID: #{mintResult.tokenId}</div>
                     <div className="flex items-center justify-center space-x-2">
                       <span>Tx: {mintResult.txHash?.slice(0, 10)}...</span>
                       <button
-                        onClick={() => window.open(`https://explorer.monad.xyz/tx/${mintResult.txHash}`, '_blank')}
+                        onClick={() => window.open(`https://explorer.testnet1.monad.xyz/tx/${mintResult.txHash}`, '_blank')}
                         className="text-green-600 hover:text-green-800"
                       >
                         <ExternalLink className="w-4 h-4" />

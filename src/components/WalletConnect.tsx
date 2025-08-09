@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Wallet, Zap, Shield, Users } from 'lucide-react';
-import { validateMonadAddress, connectWallet } from '../utils/monadApi';
+import { validateMonadAddress, connectWallet, checkAndSwitchToMonad } from '../utils/monadApi';
 import type { Context } from '@farcaster/frame-core';
 
 interface WalletConnectProps {
@@ -25,6 +25,13 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
     try {
       console.log('🔌 Attempting auto wallet connection...');
       
+      // First check and switch to Monad network
+      const networkSwitched = await checkAndSwitchToMonad();
+      if (!networkSwitched) {
+        setError('Please switch to Monad Testnet to continue');
+        return;
+      }
+      
       // Try to connect to wallet
       const address = await connectWallet();
       
@@ -42,14 +49,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
       }
     } catch (err) {
       console.error('❌ Auto-connect failed:', err);
-      
-      // Fallback to demo address
-      const demoAddress = farcasterUser 
-        ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
-        : `0x${'1234567890abcdef'.repeat(2).padStart(40, '0')}`;
-      
-      console.log('🎭 Fallback to demo address:', demoAddress);
-      onConnect(demoAddress);
+      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
     } finally {
       setIsValidating(false);
     }
@@ -226,6 +226,12 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             </div>
           </div>
         </div>
+      </div>
+      
+      <div className="text-center">
+        <p className="text-xs text-gray-500">
+          🌐 Will connect to Monad Testnet (Chain ID: 10143)
+        </p>
       </div>
     </div>
   );

@@ -243,24 +243,31 @@ export const generatePortfolioImage = async (
 };
 
 export const mintPortfolioNFT = async (
+  userAddress: string,
   portfolio: Portfolio,
-  settings: any,
-  userAddress: string
+  colorPalette: string,
+  showTotalValue: boolean
 ): Promise<{ success: boolean; txHash?: string; tokenId?: string; error?: string }> => {
   try {
     console.log('🎨 Starting portfolio NFT minting process...');
     
+    // Ensure we're on Monad network before minting
+    const networkSwitched = await checkAndSwitchToMonad();
+    if (!networkSwitched) {
+      throw new Error('Please switch to Monad Testnet to mint NFT');
+    }
+    
     // Generate portfolio image for NFT metadata
     const imageUrl = await generatePortfolioImage(
       portfolio,
-      settings.colorPalette,
-      settings.showTotalValue
+      colorPalette,
+      showTotalValue
     );
     
     // Create NFT metadata
     const metadata = {
       name: `Monadfolio Portfolio #${Date.now()}`,
-      description: `On-chain portfolio identity featuring ${portfolio.assets.length} assets and ${portfolio.nfts.length} NFTs on Monad blockchain. Total value: ${settings.showTotalValue ? `$${portfolio.totalValue.toLocaleString()}` : 'Hidden'}`,
+      description: `On-chain portfolio identity featuring ${portfolio.assets.length} assets and ${portfolio.nfts.length} NFTs on Monad blockchain. Total value: ${showTotalValue ? `$${portfolio.totalValue.toLocaleString()}` : 'Hidden'}`,
       image: imageUrl,
       attributes: [
         {
@@ -273,15 +280,19 @@ export const mintPortfolioNFT = async (
         },
         {
           trait_type: "Portfolio Value",
-          value: settings.showTotalValue ? portfolio.totalValue : "Hidden"
+          value: showTotalValue ? portfolio.totalValue : "Hidden"
         },
         {
           trait_type: "Color Palette",
-          value: settings.colorPalette
+          value: colorPalette
         },
         {
           trait_type: "Blockchain",
           value: "Monad"
+        },
+        {
+          trait_type: "Network",
+          value: "Monad Testnet"
         },
         {
           trait_type: "Created Date",
@@ -294,7 +305,7 @@ export const mintPortfolioNFT = async (
     
     // In a real implementation, this would:
     // 1. Upload metadata to IPFS
-    // 2. Call Monad NFT contract to mint
+    // 2. Call Monad Testnet NFT contract to mint
     // 3. Return transaction hash and token ID
     
     // For demo purposes, simulate the minting process
@@ -303,7 +314,7 @@ export const mintPortfolioNFT = async (
     const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`;
     const mockTokenId = Math.floor(Math.random() * 10000).toString();
     
-    console.log('✅ Portfolio NFT minted successfully!');
+    console.log('✅ Portfolio NFT minted successfully on Monad Testnet!');
     console.log('📄 Transaction Hash:', mockTxHash);
     console.log('🎨 Token ID:', mockTokenId);
     
@@ -329,6 +340,13 @@ export const connectWallet = async (): Promise<string | null> => {
     // Check if we're in a browser environment
     if (typeof window !== 'undefined' && window.ethereum) {
       console.log('🦊 MetaMask detected, requesting accounts...');
+      
+      // First ensure we're on the correct network
+      const networkSwitched = await checkAndSwitchToMonad();
+      if (!networkSwitched) {
+        throw new Error('Failed to connect to Monad network');
+      }
+      
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_requestAccounts', []);
       
