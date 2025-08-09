@@ -17,6 +17,8 @@ import { Wallet, Award, Newspaper } from 'lucide-react';
 const queryClient = new QueryClient();
 
 function MonadfolioApp() {
+  // Add error boundary
+  try {
   const { context, isReady, isInFarcaster } = useFarcasterSDK();
   const { isConnected, address, isConnecting, connectWallet, isOnMonad, switchToMonad } = useFarcasterWallet();
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
@@ -53,7 +55,8 @@ function MonadfolioApp() {
   const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
   const isAppEnabled = appEnabledEnv !== 'false';
 
-  const handleMintPortfolioNFT = async () => {
+    // Simplified loading check - don't block for too long
+    if (!isReady) {
     if (!portfolio) return;
     
     setMintingStatus('minting');
@@ -91,6 +94,23 @@ function MonadfolioApp() {
         </div>
       </div>
     );
+  } catch (error) {
+    console.error('App rendering error:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
+          <p className="text-red-600 mb-4">Something went wrong. Please refresh the page.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
   }
 
   if (!isAppEnabled) {

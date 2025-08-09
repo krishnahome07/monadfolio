@@ -11,8 +11,15 @@ export const useFarcasterSDK = () => {
       try {
         console.log('🚀 Initializing Farcaster Miniapp SDK...');
         
+        // Add timeout to prevent infinite loading
+        const timeout = setTimeout(() => {
+          console.log('⏰ SDK initialization timeout - proceeding as web app');
+          setIsReady(true);
+        }, 3000);
+        
         if (!sdk) {
           console.log('❌ Farcaster SDK not available - running as standalone web app');
+          clearTimeout(timeout);
           setIsReady(true);
           return;
         }
@@ -33,6 +40,7 @@ export const useFarcasterSDK = () => {
         await sdk.actions.ready();
         console.log('🎉 Splash screen dismissed successfully!');
         
+        clearTimeout(timeout);
         setIsReady(true);
         
       } catch (error) {
