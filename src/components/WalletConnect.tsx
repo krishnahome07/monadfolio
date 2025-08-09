@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, Zap, Shield, Users } from 'lucide-react';
+import { Wallet, Zap, Shield, Users, Search } from 'lucide-react';
 import { validateMonadAddress, connectWallet, checkAndSwitchToMonad } from '../utils/monadApi';
 import type { Context } from '@farcaster/frame-core';
 
@@ -17,6 +17,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   const [manualAddress, setManualAddress] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchMode, setSearchMode] = useState(false);
 
   const handleAutoConnect = async () => {
     setIsValidating(true);
@@ -72,6 +73,11 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
     onConnect(manualAddress.trim());
   };
 
+  const handleSearchAddress = () => {
+    setSearchMode(true);
+    setError(null);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
       {/* Header */}
@@ -82,7 +88,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
           <h2 className="text-2xl font-bold mb-2">Connect Your Monad Wallet</h2>
           <p className="text-purple-100">
-            Visualize your portfolio, earn badges, and stay updated
+            {isInFarcaster 
+              ? "Your Farcaster profile is ready! Connect your wallet to see your portfolio."
+              : "Search any Monad address or connect your wallet to explore portfolios."
+            }
           </p>
         </div>
       </div>
@@ -112,11 +121,13 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
                 )}
               </div>
             </div>
+            <p className="text-sm text-purple-600 mt-2">✨ Your Farcaster profile will enhance your portfolio experience!</p>
           </div>
         )}
 
         {/* Auto Connect Option */}
-        <div className="space-y-4">
+        {isInFarcaster ? (
+          <div className="space-y-4">
           <button
             onClick={handleAutoConnect}
             disabled={isValidating}
@@ -134,6 +145,26 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </>
             )}
           </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <button
+              onClick={handleSearchAddress}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <Search className="w-5 h-5" />
+              <span>Search Monad Address</span>
+            </button>
+            
+            <button
+              onClick={handleAutoConnect}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <Zap className="w-4 h-4" />
+              <span>Connect My Wallet</span>
+            </button>
+          </div>
+        )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -145,9 +176,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
 
           {/* Manual Address Entry */}
-          <div className="space-y-3">
+          {(searchMode || isInFarcaster) && (
+            <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700">
-              Enter Monad Wallet Address
+              {searchMode ? 'Search Monad Address' : 'Enter Monad Wallet Address'}
             </label>
             <input
               type="text"
@@ -158,9 +190,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             />
             <button
               onClick={handleManualConnect}
-              className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200"
+              className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center space-x-2"
             >
-              Connect Manually
+              <Search className="w-4 h-4" />
+              <span>{searchMode ? 'View Portfolio' : 'Connect Manually'}</span>
             </button>
             
             {/* Demo Button for Testing */}
@@ -174,8 +207,9 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             >
               🎭 Use Demo Address (for testing)
             </button>
-          </div>
-        </div>
+            </div>
+          )}
+        
 
         {/* Error Display */}
         {error && (
@@ -186,7 +220,9 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
 
         {/* Features Preview */}
         <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">What you'll get:</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            {isInFarcaster ? "What you'll get:" : "Explore any Monad portfolio:"}
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -194,7 +230,9 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </div>
               <div>
                 <div className="font-medium text-gray-800">Visual Portfolio</div>
-                <div className="text-sm text-gray-600">Beautiful block chart of your assets</div>
+                <div className="text-sm text-gray-600">
+                  {isInFarcaster ? "Beautiful block chart of your assets" : "View any address's asset allocation"}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -203,7 +241,9 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </div>
               <div>
                 <div className="font-medium text-gray-800">Achievement Badges</div>
-                <div className="text-sm text-gray-600">Earn badges for your on-chain activity</div>
+                <div className="text-sm text-gray-600">
+                  {isInFarcaster ? "Earn badges for your on-chain activity" : "See earned badges and achievements"}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -212,7 +252,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </div>
               <div>
                 <div className="font-medium text-gray-800">Monad News</div>
-                <div className="text-sm text-gray-600">Stay updated with ecosystem news</div>
+                <div className="text-sm text-gray-600">Latest ecosystem updates and news</div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -221,7 +261,9 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </div>
               <div>
                 <div className="font-medium text-gray-800">Privacy Controls</div>
-                <div className="text-sm text-gray-600">Hide assets and control what you share</div>
+                <div className="text-sm text-gray-600">
+                  {isInFarcaster ? "Hide assets and control what you share" : "Customizable portfolio views"}
+                </div>
               </div>
             </div>
           </div>

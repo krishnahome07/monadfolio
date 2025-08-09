@@ -32,7 +32,7 @@ function MonadfolioApp() {
     getVisibleAssets,
     getEarnedBadges,
     refreshPortfolio
-  } = usePortfolio(connectedAddress);
+  } = usePortfolio(connectedAddress, context?.user);
 
   const {
     news,
@@ -417,7 +417,15 @@ Built on @monad testnet 🚀
             <div className="text-center">
               <div className="inline-flex items-center space-x-2 bg-white bg-opacity-10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span>Connected: {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}</span>
+                <span>
+                  {context?.user ? 'Farcaster + ' : ''}
+                  {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}
+                </span>
+                {context?.user && (
+                  <div className="text-xs bg-purple-600 px-2 py-1 rounded-full">
+                    @{context.user.username || `fid:${context.user.fid}`}
+                  </div>
+                )}
               </div>
               
               {/* Minting Status */}

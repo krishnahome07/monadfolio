@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Portfolio, Badge, UserProfile, PortfolioSettings } from '../types/portfolio';
 import { fetchPortfolio, fetchUserBadges } from '../utils/monadApi';
+import type { Context } from '@farcaster/frame-core';
 
-export const usePortfolio = (address: string | null) => {
+export const usePortfolio = (address: string | null, farcasterUser?: Context.User) => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,8 +23,10 @@ export const usePortfolio = (address: string | null) => {
     
     try {
       console.log('📊 Loading portfolio for address:', address);
-      const portfolioData = await fetchPortfolio(address);
-      const badgeData = await fetchUserBadges(address, portfolioData);
+      console.log('👤 Farcaster user:', farcasterUser?.username || 'Not connected');
+      
+      const portfolioData = await fetchPortfolio(address, farcasterUser);
+      const badgeData = await fetchUserBadges(address, portfolioData, farcasterUser);
       
       setPortfolio(portfolioData);
       setBadges(badgeData);
@@ -77,7 +80,7 @@ export const usePortfolio = (address: string | null) => {
     if (address) {
       loadPortfolio();
     }
-  }, [address]);
+  }, [address, farcasterUser?.fid]); // Reload when Farcaster user changes
 
   return {
     portfolio,
