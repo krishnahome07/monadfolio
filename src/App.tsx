@@ -428,6 +428,25 @@ Built on @monad testnet 🚀
                 )}
               </div>
               
+              {/* User Stats Display */}
+              {portfolio?.userStats && (
+                <div className="mt-3 flex justify-center space-x-4 text-sm">
+                  <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
+                    💰 {portfolio.userStats.monadBalance.toFixed(4)} MON
+                  </div>
+                  <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
+                    📊 {portfolio.userStats.totalTransactions} transactions
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs ${
+                    portfolio.userStats.isActiveWallet 
+                      ? 'bg-green-500 bg-opacity-20 text-green-200' 
+                      : 'bg-yellow-500 bg-opacity-20 text-yellow-200'
+                  }`}>
+                    {portfolio.userStats.isActiveWallet ? '🟢 Active' : '🟡 New'}
+                  </div>
+                </div>
+              )}
+              
               {/* Minting Status */}
               {mintingStatus === 'success' && mintResult && (
                 <div className="mt-4 max-w-md mx-auto bg-green-50 border border-green-200 rounded-xl p-4">

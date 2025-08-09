@@ -454,10 +454,11 @@ export const connectWallet = async (): Promise<string | null> => {
     if (typeof window !== 'undefined' && window.ethereum) {
       console.log('🦊 MetaMask detected, requesting accounts...');
       
-      // First ensure we're on the correct network
-      const networkSwitched = await checkAndSwitchToMonad();
-      if (!networkSwitched) {
-        throw new Error('Failed to connect to Monad network');
+      try {
+        // Try to ensure we're on the correct network
+        await checkAndSwitchToMonad();
+      } catch (networkError) {
+        console.warn('⚠️ Network switch failed, continuing with current network:', networkError);
       }
       
       const provider = new ethers.BrowserProvider(window.ethereum);

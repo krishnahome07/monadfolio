@@ -6,6 +6,7 @@ export interface Asset {
   price: number;
   change24h: number;
   hidden?: boolean;
+  transactionCount?: number;
 }
 
 export interface NFT {
