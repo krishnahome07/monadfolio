@@ -9,7 +9,7 @@ import { useFarcasterSDK } from './hooks/useFarcasterSDK';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useMonadNews } from './hooks/useMonadNews';
 import { connectWallet, mintPortfolioNFT } from './utils/monadApi';
-import { Wallet, Award, Newspaper, Settings, Share2 } from 'lucide-react';
+import { Wallet, Award, Newspaper, Settings, Share2, ExternalLink } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
@@ -102,25 +102,25 @@ function MonadfolioApp() {
       setMintResult(result);
       setMintingStatus('success');
       
-      // Auto-hide success message after 5 seconds
+      // Reset status after 5 seconds
       setTimeout(() => {
         setMintingStatus('idle');
         setMintResult(null);
       }, 5000);
     } catch (error) {
-      console.error('❌ Minting failed:', error);
+      console.error('❌ NFT minting failed:', error);
       setMintingStatus('error');
       
-      // Auto-hide error message after 5 seconds
+      // Reset status after 3 seconds
       setTimeout(() => {
         setMintingStatus('idle');
-      }, 5000);
+      }, 3000);
     }
   };
 
   const generatePortfolioImage = async (portfolio: any, colorPalette: string, showTotalValue: boolean) => {
     // Mock implementation - in real app this would generate an actual image
-    return 'https://via.placeholder.com/800x600/6366f1/ffffff?text=Portfolio+Snapshot';
+    return 'https://example.com/portfolio-image.png';
   };
 
   const handleSharePortfolio = async () => {
@@ -177,12 +177,12 @@ function MonadfolioApp() {
         alert('Portfolio details copied to clipboard!');
         setShareStatus('success');
       } else {
-        // Final fallback - show text to copy
+        // Final fallback
         prompt('Copy this text to share your portfolio:', shareText);
         setShareStatus('success');
       }
     } catch (error) {
-      console.error('❌ Share failed:', error);
+      console.error('Portfolio share failed:', error);
       setShareStatus('error');
     } finally {
       setTimeout(() => setShareStatus('idle'), 3000);
@@ -368,6 +368,32 @@ function MonadfolioApp() {
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span>Connected: {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}</span>
               </div>
+              
+              {/* Minting Status */}
+              {mintingStatus === 'success' && mintResult && (
+                <div className="mt-4 max-w-md mx-auto bg-green-50 border border-green-200 rounded-xl p-4">
+                  <div className="text-green-800 font-semibold mb-2">🎉 NFT Minted Successfully!</div>
+                  <div className="text-sm text-green-700 space-y-1">
+                    <div>Token ID: #{mintResult.tokenId}</div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>Tx: {mintResult.txHash?.slice(0, 10)}...</span>
+                      <button
+                        onClick={() => window.open(`https://explorer.monad.xyz/tx/${mintResult.txHash}`, '_blank')}
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {mintingStatus === 'error' && (
+                <div className="mt-4 max-w-md mx-auto bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="text-red-800 font-semibold">❌ NFT Minting Failed</div>
+                  <div className="text-sm text-red-700 mt-1">Please try again later</div>
+                </div>
+              )}
             </div>
           </div>
         )}
