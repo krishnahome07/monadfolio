@@ -20,7 +20,18 @@ function MonadfolioApp() {
   // Add error boundary
   try {
   const { context, isReady, isInFarcaster } = useFarcasterSDK();
-  const { isConnected, address, isConnecting, connectWallet, isOnMonad, switchToMonad } = useFarcasterWallet();
+  
+  // Only use wallet connection for Farcaster users
+  const walletHook = useFarcasterWallet();
+  const { isConnected, address, isConnecting, connectWallet, isOnMonad, switchToMonad } = isInFarcaster ? walletHook : {
+    isConnected: false,
+    address: null,
+    isConnecting: false,
+    connectWallet: () => {},
+    isOnMonad: true, // Assume true for non-Farcaster users
+    switchToMonad: () => {}
+  };
+  
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [manualAddress, setManualAddress] = useState<string | null>(null);
@@ -30,7 +41,7 @@ function MonadfolioApp() {
   console.log('App.tsx - isInFarcaster:', isInFarcaster);
   console.log('App.tsx - context:', context);
 
-  const connectedAddress = address || manualAddress;
+  const connectedAddress = isInFarcaster ? (address || manualAddress) : manualAddress;
 
   const { 
     portfolio, 
@@ -130,15 +141,15 @@ function MonadfolioApp() {
           <div className="max-w-md mx-auto">
             <WalletConnect 
               onConnect={handleManualConnect}
-              onWalletConnect={connectWallet}
+              onWalletConnect={isInFarcaster ? connectWallet : () => {}}
               isInFarcaster={isInFarcaster}
               farcasterUser={context?.user}
-              isConnected={isConnected}
-              isConnecting={isConnecting}
+              isConnected={isInFarcaster ? isConnected : false}
+              isConnecting={isInFarcaster ? isConnecting : false}
               connectionError={connectionError}
-              walletAddress={address}
-              isOnMonad={isOnMonad}
-              onSwitchToMonad={switchToMonad}
+              walletAddress={isInFarcaster ? address : undefined}
+              isOnMonad={isInFarcaster ? isOnMonad : true}
+              onSwitchToMonad={isInFarcaster ? switchToMonad : () => {}}
             />
           </div>
         ) : (
@@ -232,7 +243,7 @@ function MonadfolioApp() {
                       <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                       <div>
                         <div className="text-white text-sm font-medium">
-                          {isInFarcaster ? 'Farcaster + ' : ''}{isOnMonad ? 'Monad Testnet' : 'Wrong Network'}
+                          {isInFarcaster ? `Farcaster + ${isOnMonad ? 'Monad Testnet' : 'Wrong Network'}` : 'Monad Portfolio'}
                         </div>
                         <div className="text-purple-200 text-xs font-mono">
                           {connectedAddress}
@@ -242,7 +253,7 @@ function MonadfolioApp() {
                   </div>
                   
                   {/* Farcaster User Info */}
-                  {context?.user && (
+                  {isInFarcaster && context?.user && (
                     <div className="mt-3 pt-3 border-t border-white border-opacity-20">
                       <div className="flex items-center justify-center space-x-2">
                         {context.user.pfpUrl ? (
