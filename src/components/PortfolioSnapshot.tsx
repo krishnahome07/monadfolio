@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, Eye, EyeOff, Palette, Share2, RefreshCw } from 'lucide-react';
+import { Wallet, Eye, EyeOff, Palette, Zap, RefreshCw, ExternalLink } from 'lucide-react';
 import { Portfolio, PortfolioSettings, ColorPalette } from '../types/portfolio';
 
 interface PortfolioSnapshotProps {
@@ -7,9 +7,10 @@ interface PortfolioSnapshotProps {
   settings: PortfolioSettings;
   onSettingsChange: (settings: Partial<PortfolioSettings>) => void;
   onToggleAsset: (symbol: string) => void;
-  onShare: () => void;
+  onMintNFT: () => void;
   onRefresh: () => void;
   loading?: boolean;
+  minting?: boolean;
 }
 
 const COLOR_PALETTES: Record<ColorPalette, { name: string; colors: string[] }> = {
@@ -40,9 +41,10 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
   settings,
   onSettingsChange,
   onToggleAsset,
-  onShare,
+  onMintNFT,
   onRefresh,
-  loading = false
+  loading = false,
+  minting = false
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   
@@ -236,12 +238,28 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
       {/* Share Button */}
       <div className="border-t border-gray-200 p-4">
         <button
-          onClick={onShare}
-          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
+          onClick={onMintNFT}
+          disabled={minting}
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Share2 className="w-5 h-5" />
-          <span>Share Portfolio</span>
+          {minting ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <span>Minting NFT...</span>
+            </>
+          ) : (
+            <>
+              <Zap className="w-5 h-5" />
+              <span>Mint as NFT</span>
+            </>
+          )}
         </button>
+        
+        <div className="mt-2 text-center">
+          <p className="text-xs text-gray-500">
+            🎨 Mint your portfolio as an NFT on Monad blockchain
+          </p>
+        </div>
       </div>
     </div>
   );

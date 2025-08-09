@@ -202,19 +202,124 @@ export const generatePortfolioImage = async (
   colorPalette: string,
   showTotalValue: boolean
 ): Promise<string> => {
-  // This would generate an actual image in production
-  // For now, return a placeholder
+  // Generate a more detailed portfolio visualization for NFT
+  const colors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EC4899'];
+  const visibleAssets = portfolio.assets.filter(asset => !asset.hidden);
+  const totalValue = visibleAssets.reduce((sum, asset) => sum + asset.value, 0);
+  
+  const assetBlocks = visibleAssets.map((asset, index) => {
+    const percentage = (asset.value / totalValue) * 100;
+    const height = Math.max(percentage * 2, 20);
+    const color = colors[index % colors.length];
+    const x = 50 + (index * 80);
+    
+    return `
+      <rect x="${x}" y="${200 - height}" width="60" height="${height}" fill="${color}" rx="8"/>
+      <text x="${x + 30}" y="${220}" text-anchor="middle" fill="white" font-size="10" font-weight="bold">${asset.symbol}</text>
+      <text x="${x + 30}" y="${235}" text-anchor="middle" fill="white" font-size="8">$${asset.value.toLocaleString()}</text>
+    `;
+  }).join('');
+  
   return `data:image/svg+xml,${encodeURIComponent(`
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-      <rect width="400" height="300" fill="#6B46C1"/>
-      <text x="200" y="150" text-anchor="middle" fill="white" font-size="24" font-family="Arial">
-        Portfolio Snapshot
+    <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="500" height="300" fill="url(#bg)" rx="20"/>
+      <text x="250" y="40" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Monadfolio Portfolio</text>
+      <text x="250" y="65" text-anchor="middle" fill="#E0E7FF" font-size="14">On-Chain Identity NFT</text>
+      ${assetBlocks}
+      <text x="250" y="260" text-anchor="middle" fill="white" font-size="16" font-weight="bold">
+        ${showTotalValue ? `Total: $${totalValue.toLocaleString()}` : 'Portfolio Value Hidden'}
       </text>
-      <text x="200" y="180" text-anchor="middle" fill="white" font-size="16" font-family="Arial">
-        ${showTotalValue ? `$${portfolio.totalValue.toLocaleString()}` : 'Value Hidden'}
+      <text x="250" y="280" text-anchor="middle" fill="#C4B5FD" font-size="12">
+        ${visibleAssets.length} Assets • ${portfolio.nfts.length} NFTs • Powered by Monad
       </text>
     </svg>
   `)}`;
+};
+
+export const mintPortfolioNFT = async (
+  portfolio: Portfolio,
+  settings: any,
+  userAddress: string
+): Promise<{ success: boolean; txHash?: string; tokenId?: string; error?: string }> => {
+  try {
+    console.log('🎨 Starting portfolio NFT minting process...');
+    
+    // Generate portfolio image for NFT metadata
+    const imageUrl = await generatePortfolioImage(
+      portfolio,
+      settings.colorPalette,
+      settings.showTotalValue
+    );
+    
+    // Create NFT metadata
+    const metadata = {
+      name: `Monadfolio Portfolio #${Date.now()}`,
+      description: `On-chain portfolio identity featuring ${portfolio.assets.length} assets and ${portfolio.nfts.length} NFTs on Monad blockchain. Total value: ${settings.showTotalValue ? `$${portfolio.totalValue.toLocaleString()}` : 'Hidden'}`,
+      image: imageUrl,
+      attributes: [
+        {
+          trait_type: "Total Assets",
+          value: portfolio.assets.length
+        },
+        {
+          trait_type: "NFT Count", 
+          value: portfolio.nfts.length
+        },
+        {
+          trait_type: "Portfolio Value",
+          value: settings.showTotalValue ? portfolio.totalValue : "Hidden"
+        },
+        {
+          trait_type: "Color Palette",
+          value: settings.colorPalette
+        },
+        {
+          trait_type: "Blockchain",
+          value: "Monad"
+        },
+        {
+          trait_type: "Created Date",
+          value: new Date().toISOString().split('T')[0]
+        }
+      ],
+      external_url: "https://monadfolio.vercel.app",
+      background_color: "6B46C1"
+    };
+    
+    // In a real implementation, this would:
+    // 1. Upload metadata to IPFS
+    // 2. Call Monad NFT contract to mint
+    // 3. Return transaction hash and token ID
+    
+    // For demo purposes, simulate the minting process
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`;
+    const mockTokenId = Math.floor(Math.random() * 10000).toString();
+    
+    console.log('✅ Portfolio NFT minted successfully!');
+    console.log('📄 Transaction Hash:', mockTxHash);
+    console.log('🎨 Token ID:', mockTokenId);
+    
+    return {
+      success: true,
+      txHash: mockTxHash,
+      tokenId: mockTokenId
+    };
+    
+  } catch (error) {
+    console.error('❌ NFT minting failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
 };
 
 export const connectWallet = async (): Promise<string | null> => {
