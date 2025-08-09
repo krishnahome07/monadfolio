@@ -431,19 +431,30 @@ Built on @monad testnet 🚀
               {/* User Stats Display */}
               {portfolio?.userStats && (
                 <div className="mt-3 flex justify-center space-x-4 text-sm">
-                  <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
-                    💰 {portfolio.userStats.monadBalance.toFixed(4)} MON
-                  </div>
-                  <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
-                    📊 {portfolio.userStats.totalTransactions} transactions
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-xs ${
-                    portfolio.userStats.isActiveWallet 
-                      ? 'bg-green-500 bg-opacity-20 text-green-200' 
-                      : 'bg-yellow-500 bg-opacity-20 text-yellow-200'
-                  }`}>
-                    {portfolio.userStats.isActiveWallet ? '🟢 Active' : '🟡 New'}
-                  </div>
+                  {portfolio.userStats.monadBalance > 0 && (
+                    <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
+                      💰 {portfolio.userStats.monadBalance.toFixed(4)} MON
+                    </div>
+                  )}
+                  {portfolio.userStats.totalTransactions > 0 && (
+                    <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
+                      📊 {portfolio.userStats.totalTransactions} transactions
+                    </div>
+                  )}
+                  {(portfolio.userStats.monadBalance > 0 || portfolio.userStats.totalTransactions > 0) && (
+                    <div className={`px-3 py-1 rounded-full text-xs ${
+                      portfolio.userStats.isActiveWallet 
+                        ? 'bg-green-500 bg-opacity-20 text-green-200' 
+                        : 'bg-yellow-500 bg-opacity-20 text-yellow-200'
+                    }`}>
+                      {portfolio.userStats.isActiveWallet ? '🟢 Active Wallet' : '🟡 New Wallet'}
+                    </div>
+                  )}
+                  {portfolio.userStats.monadBalance === 0 && portfolio.userStats.totalTransactions === 0 && (
+                    <div className="bg-white bg-opacity-10 backdrop-blur-sm text-white px-3 py-1 rounded-full">
+                      🔍 Enter a Monad testnet address to view real data
+                    </div>
+                  )}
                 </div>
               )}
               
