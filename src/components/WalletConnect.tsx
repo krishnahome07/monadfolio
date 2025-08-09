@@ -15,7 +15,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
   onWalletConnect,
   isInFarcaster,
-  farcasterUser
+  farcasterUser,
   connectionError
 }) => {
   const [manualAddress, setManualAddress] = useState('');
