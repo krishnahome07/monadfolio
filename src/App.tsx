@@ -14,8 +14,8 @@ import { Wallet, Award, Newspaper, Settings, Share2, ExternalLink } from 'lucide
 const queryClient = new QueryClient();
 
 function MonadfolioApp() {
-  const { context, isReady, isInFarcaster } = useFarcasterSDK();
-  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+  const { context, isReady, isInFarcaster, connectedAddress: farcasterConnectedAddress, autoConnecting } = useFarcasterSDK();
+  const [connectedAddress, setConnectedAddress] = useState<string | null>(farcasterConnectedAddress);
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [mintResult, setMintResult] = useState<{ txHash?: string; tokenId?: string } | null>(null);
@@ -45,35 +45,23 @@ function MonadfolioApp() {
   const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
   const isAppEnabled = appEnabledEnv !== 'false';
 
-  // Auto-connect wallet if user has Farcaster context
+  // Update connected address when Farcaster wallet connects
   useEffect(() => {
-    if (isReady && !connectedAddress) {
-      console.log('🎯 Ready to connect wallet for Farcaster user:', context?.user?.fid || 'No user');
-      handleAutoConnect();
+    if (farcasterConnectedAddress && !connectedAddress) {
+      console.log('🔗 Using Farcaster connected address:', farcasterConnectedAddress);
+      setConnectedAddress(farcasterConnectedAddress);
     }
-  }, [isReady, connectedAddress]);
+  }, [farcasterConnectedAddress, connectedAddress]);
 
-  const handleAutoConnect = async () => {
-    try {
-      console.log('🔌 Starting auto-connect process...');
-      
-      // Only try real wallet connection - no fake addresses
-      let address = await connectWallet();
-      
-      if (address) {
-        console.log('✅ Real wallet connected:', address);
-        setConnectedAddress(address);
-      } else {
-        console.log('⚠️ No wallet detected - user must connect manually or enter address');
-        // No automatic demo addresses - user must take action
-      }
-    } catch (error) {
-      console.error('❌ Auto-connect failed:', error);
-      // No fallback addresses - user must connect properly
+  // Manual connect for non-Farcaster users or manual override
+  const handleManualConnect = async () => {
+    const address = await connectWallet();
+    if (address) {
+      setConnectedAddress(address);
     }
   };
 
-  const handleManualConnect = (address: string) => {
+  const handleAddressInput = (address: string) => {
     console.log('📝 Manual wallet connection:', address);
     setConnectedAddress(address);
   };
@@ -256,14 +244,28 @@ Built on @monad testnet 🚀
   };
 
   // Show loading screen until SDK is ready
-  if (!isReady) {
+  if (!isReady || (isInFarcaster && autoConnecting)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
-          <p className="text-gray-600">Loading your Monad portfolio...</p>
-          <p className="text-sm text-gray-500 mt-2">Initializing Farcaster SDK...</p>
+          <p className="text-gray-600">
+            {autoConnecting ? 'Connecting your Farcaster wallet...' : 'Loading your Monad portfolio...'}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            {autoConnecting ? 'Fetching wallet details...' : 'Initializing Farcaster SDK...'}
+          </p>
+          {isInFarcaster && context?.user && (
+            <div className="mt-4 flex items-center justify-center space-x-2">
+              {context.user.pfpUrl && (
+                <img src={context.user.pfpUrl} alt="Profile" className="w-8 h-8 rounded-full" />
+              )}
+              <span className="text-sm text-purple-600">
+                {context.user.displayName || context.user.username || `User ${context.user.fid}`}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -300,7 +302,8 @@ Built on @monad testnet 🚀
         {!connectedAddress ? (
           <div className="max-w-md mx-auto">
             <WalletConnect 
-              onConnect={handleManualConnect}
+              onConnect={handleAddressInput}
+              onWalletConnect={handleManualConnect}
               isInFarcaster={isInFarcaster}
               farcasterUser={context?.user}
             />

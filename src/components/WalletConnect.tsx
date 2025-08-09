@@ -5,12 +5,14 @@ import type { Context } from '@farcaster/frame-core';
 
 interface WalletConnectProps {
   onConnect: (address: string) => void;
+  onWalletConnect?: () => void;
   isInFarcaster: boolean;
   farcasterUser?: Context.User;
 }
 
 export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
+  onWalletConnect,
   isInFarcaster,
   farcasterUser
 }) => {
@@ -46,6 +48,14 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
       setError('Failed to connect wallet. Please try again or enter address manually.');
     } finally {
       setIsValidating(false);
+    }
+  };
+
+  const handleWalletConnect = async () => {
+    if (onWalletConnect) {
+      await onWalletConnect();
+    } else {
+      await handleAutoConnect();
     }
   };
 
@@ -119,27 +129,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
         )}
 
         {/* Auto Connect Option */}
-        {isInFarcaster ? (
-          <div className="space-y-4">
-          <button
-            onClick={handleAutoConnect}
-            disabled={isValidating}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
-          >
-            {isValidating ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Connecting...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-5 h-5" />
-                <span>Auto-Connect Wallet</span>
-              </>
-            )}
-          </button>
-          </div>
-        ) : (
+        {!isInFarcaster ? (
           <div className="space-y-4">
             <button
               onClick={handleSearchAddress}
@@ -150,11 +140,52 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             </button>
             
             <button
-              onClick={handleAutoConnect}
+              onClick={handleWalletConnect}
+              disabled={isValidating}
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
             >
-              <Zap className="w-4 h-4" />
-              <span>Connect My Wallet</span>
+              {isValidating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  <span>Connect My Wallet</span>
+                </>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-800 font-semibold">Farcaster Wallet Connected</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Your wallet was automatically connected via Farcaster. 
+                Real Monad blockchain data is being fetched.
+              </p>
+            </div>
+            
+            <button
+              onClick={handleWalletConnect}
+              disabled={isValidating}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              {isValidating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Reconnecting...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  <span>Refresh Connection</span>
+                </>
+              )}
             </button>
           </div>
         )}
@@ -169,37 +200,37 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
 
           {/* Manual Address Entry */}
-          {(searchMode || isInFarcaster) && (
+          {searchMode && (
             <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
-              {searchMode ? 'Search Monad Address' : 'Enter Monad Wallet Address'}
-            </label>
-            <input
-              type="text"
-              value={manualAddress}
-              onChange={(e) => setManualAddress(e.target.value)}
-              placeholder="0x1234567890abcdef1234567890abcdef12345678"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            />
-            <button
-              onClick={handleManualConnect}
-              className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center space-x-2"
-            >
-              <Search className="w-4 h-4" />
-              <span>{searchMode ? 'View Portfolio' : 'Connect Manually'}</span>
-            </button>
-            
-            {/* Demo Button for Testing */}
-            <button
-              onClick={() => {
-                // Use a real Monad testnet address for demo
-                const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
-                setManualAddress(demoAddress);
-              }}
-              className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 text-sm"
-            >
-              📝 Fill Demo Address (for testing)
-            </button>
+              <label className="block text-sm font-medium text-gray-700">
+                Search Monad Address
+              </label>
+              <input
+                type="text"
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                placeholder="0x1234567890abcdef1234567890abcdef12345678"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              />
+              <button
+                onClick={handleManualConnect}
+                className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center space-x-2"
+              >
+                <Search className="w-4 h-4" />
+                <span>View Portfolio</span>
+              </button>
+              
+              {/* Demo Button for Testing */}
+              <button
+                onClick={() => {
+                  // Use a real Monad testnet address for demo
+                  const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
+                  setManualAddress(demoAddress);
+                }}
+                className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 text-sm"
+              >
+                📝 Fill Demo Address (for testing)
+              </button>
             </div>
           )}
         

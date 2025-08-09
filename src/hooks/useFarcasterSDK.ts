@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
+import { connectWallet } from '../utils/monadApi';
 
 export const useFarcasterSDK = () => {
   const [context, setContext] = useState<any>();
   const [isReady, setIsReady] = useState(false);
   const [isInFarcaster, setIsInFarcaster] = useState(false);
+  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+  const [autoConnecting, setAutoConnecting] = useState(false);
 
   useEffect(() => {
     const initializeSDK = async () => {
@@ -30,6 +33,12 @@ export const useFarcasterSDK = () => {
         await sdk.actions.ready();
         console.log('🎉 Splash screen dismissed successfully!');
         
+        // Auto-connect wallet after SDK is ready
+        if (frameContext?.user) {
+          console.log('🔌 Auto-connecting Farcaster wallet for user:', frameContext.user.fid);
+          await autoConnectFarcasterWallet();
+        }
+        
         setIsReady(true);
         
       } catch (error) {
@@ -39,12 +48,35 @@ export const useFarcasterSDK = () => {
       }
     };
 
+    const autoConnectFarcasterWallet = async () => {
+      setAutoConnecting(true);
+      try {
+        console.log('🔗 Attempting automatic Farcaster wallet connection...');
+        
+        // Try to connect to the user's wallet
+        const address = await connectWallet();
+        
+        if (address) {
+          console.log('✅ Farcaster wallet connected automatically:', address);
+          setConnectedAddress(address);
+        } else {
+          console.log('⚠️ No wallet detected in Farcaster context');
+        }
+      } catch (error) {
+        console.error('❌ Auto wallet connection failed:', error);
+      } finally {
+        setAutoConnecting(false);
+      }
+    };
+
     initializeSDK();
   }, []);
 
   return {
     context,
     isReady,
-    isInFarcaster
+    isInFarcaster,
+    connectedAddress,
+    autoConnecting
   };
 };
