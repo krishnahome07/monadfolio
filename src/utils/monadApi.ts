@@ -234,7 +234,7 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
       id: '1',
       title: 'Monad Testnet Launches with Record-Breaking Performance',
       summary: 'The highly anticipated Monad testnet goes live, demonstrating unprecedented transaction throughput and low latency.',
-      url: 'https://monad.xyz/blog/testnet-launch',
+      url: 'https://monad.xyz',
       source: 'Monad Official',
       publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
       category: 'official'
@@ -243,7 +243,7 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
       id: '2',
       title: 'Major DeFi Protocol Announces Monad Integration',
       summary: 'Leading decentralized exchange confirms plans to deploy on Monad mainnet, citing superior performance metrics.',
-      url: 'https://example.com/defi-monad',
+      url: 'https://monad.xyz',
       source: 'DeFi Pulse',
       publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
       category: 'ecosystem'
@@ -252,7 +252,7 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
       id: '3',
       title: 'Monad Developer Grants Program Opens Applications',
       summary: 'The Monad Foundation launches a $10M grants program to support ecosystem development and innovation.',
-      url: 'https://monad.xyz/grants',
+      url: 'https://monad.xyz',
       source: 'Monad Foundation',
       publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
       category: 'official'
@@ -261,7 +261,7 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
       id: '4',
       title: 'Analysis: Why Monad Could Reshape Ethereum Scaling',
       summary: 'Technical deep-dive into Monad\'s parallel execution model and its potential impact on blockchain scalability.',
-      url: 'https://example.com/monad-analysis',
+      url: 'https://monad.xyz',
       source: 'Crypto Research',
       publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       category: 'news'
@@ -270,7 +270,7 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
       id: '5',
       title: 'Monad NFT Collections See Surge in Trading Volume',
       summary: 'Genesis and Builder collections experience 300% increase in trading activity as mainnet approaches.',
-      url: 'https://example.com/nft-surge',
+      url: 'https://monad.xyz',
       source: 'NFT Tracker',
       publishedAt: new Date(Date.now() - 36 * 60 * 60 * 1000),
       category: 'ecosystem'
