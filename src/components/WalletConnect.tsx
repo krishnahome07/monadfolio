@@ -8,7 +8,11 @@ interface WalletConnectProps {
   onWalletConnect?: () => void;
   isInFarcaster: boolean;
   farcasterUser?: Context.User;
-  connectionError?: string | null;
+  isConnected?: boolean;
+  isConnecting?: boolean;
+  walletAddress?: string;
+  isOnMonad?: boolean;
+  onSwitchToMonad?: () => void;
 }
 
 export const WalletConnect: React.FC<WalletConnectProps> = ({
@@ -16,48 +20,20 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   onWalletConnect,
   isInFarcaster,
   farcasterUser,
-  connectionError
+  isConnected = false,
+  isConnecting = false,
+  walletAddress,
+  isOnMonad = false,
+  onSwitchToMonad
 }) => {
   const [manualAddress, setManualAddress] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchMode, setSearchMode] = useState(false);
 
-  const handleAutoConnect = async () => {
-    setIsValidating(true);
-    setError(null);
-    
-    try {
-      console.log('🔌 Attempting auto wallet connection...');
-      
-      // First check and switch to Monad network
-      const networkSwitched = await checkAndSwitchToMonad();
-      if (!networkSwitched) {
-        console.warn('⚠️ Could not switch to Monad network, proceeding with demo');
-      }
-      
-      // Try to connect to wallet
-      const address = await connectWallet();
-      
-      if (address) {
-        console.log('✅ Wallet connected:', address);
-        onConnect(address);
-      } else {
-        setError('No wallet detected. Please install MetaMask or enter an address manually.');
-      }
-    } catch (err) {
-      console.error('❌ Auto-connect failed:', err);
-      setError('Failed to connect wallet. Please try again or enter address manually.');
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
   const handleWalletConnect = async () => {
     if (onWalletConnect) {
-      await onWalletConnect();
-    } else {
-      await handleAutoConnect();
+      onWalletConnect();
     }
   };
 
@@ -104,11 +80,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
       <div className="p-6 space-y-6">
         {/* Farcaster User Info */}
         {isInFarcaster && farcasterUser && (
-          <div className={`border rounded-xl p-4 ${
-            connectionError 
-              ? 'bg-yellow-50 border-yellow-200' 
-              : 'bg-purple-50 border-purple-200'
-          }`}>
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               {farcasterUser.pfpUrl ? (
                 <img
@@ -130,20 +102,34 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
                 )}
               </div>
             </div>
-            <p className={`text-sm mt-2 ${
-              connectionError 
-                ? 'text-yellow-600' 
-                : 'text-purple-600'
-            }`}>
-              {connectionError 
-                ? '⚠️ Wallet connection failed. Please connect manually or retry.'
-                : '✨ Your Farcaster account is connected! Wallet connection in progress...'}
+            <p className="text-sm mt-2 text-purple-600">
+              {isConnected 
+                ? `✅ Wallet connected: ${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}`
+                : isConnecting 
+                  ? '🔄 Connecting to your wallet...'
+                  : '✨ Your Farcaster account is connected!'}
             </p>
           </div>
         )}
 
-        {/* Auto Connect Option */}
-        {!isInFarcaster || connectionError ? (
+        {/* Wallet Connection Status */}
+        {isInFarcaster && isConnected && !isOnMonad && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <div className="text-yellow-800 font-semibold mb-2">⚠️ Wrong Network</div>
+            <p className="text-sm text-yellow-700 mb-3">
+              Please switch to Monad Testnet to view your portfolio.
+            </p>
+            <button
+              onClick={onSwitchToMonad}
+              className="w-full bg-yellow-600 text-white py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors duration-200"
+            >
+              Switch to Monad Testnet
+            </button>
+          </div>
+        )}
+
+        {/* Connect Options */}
+        {(!isInFarcaster || !isConnected) && (
           <div className="space-y-4">
             {!isInFarcaster && (
               <>
@@ -159,40 +145,21 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             
             <button
               onClick={handleWalletConnect}
-              disabled={isValidating}
-              className={`w-full text-white py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-                isInFarcaster && connectionError
-                  ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700'
-                  : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
-              }`}
+              disabled={isConnecting}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
             >
-              {isValidating ? (
+              {isConnecting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>{isInFarcaster ? 'Retrying...' : 'Connecting...'}</span>
+                  <span>Connecting...</span>
                 </>
               ) : (
                 <>
                   <Zap className="w-4 h-4" />
-                  <span>{isInFarcaster && connectionError ? 'Retry Wallet Connection' : 'Connect My Wallet'}</span>
+                  <span>Connect Farcaster Wallet</span>
                 </>
               )}
             </button>
-          </div>
-        ) : (
-          <div className="space-y-4 text-center">
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-blue-800 font-semibold">Farcaster Account Connected</span>
-              </div>
-              <p className="text-sm text-blue-700">
-                Your Farcaster account is connected. Wallet connection should happen automatically.
-              </p>
-            </div>
-            <div className="text-sm text-gray-600">
-              <div className="animate-pulse">🔄 Connecting to your Monad wallet...</div>
-            </div>
           </div>
         )}
 

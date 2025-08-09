@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { config } from './config/wagmi';
 import { WalletConnect } from './components/WalletConnect';
 import { PortfolioSnapshot } from './components/PortfolioSnapshot';
 import { BadgeCollection } from './components/BadgeCollection';
 import { MonadNews } from './components/MonadNews';
 import { MaintenanceMode } from './components/MaintenanceMode';
 import { useFarcasterSDK } from './hooks/useFarcasterSDK';
+import { useFarcasterWallet } from './hooks/useFarcasterWallet';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useMonadNews } from './hooks/useMonadNews';
 import { connectWallet, mintPortfolioNFT } from './utils/monadApi';
@@ -14,8 +17,8 @@ import { Wallet, Award, Newspaper, Settings, Share2, ExternalLink } from 'lucide
 const queryClient = new QueryClient();
 
 function MonadfolioApp() {
-  const { context, isReady, isInFarcaster, connectedAddress: farcasterConnectedAddress, autoConnecting, connectionError, retryConnection } = useFarcasterSDK();
-  const [connectedAddress, setConnectedAddress] = useState<string | null>(farcasterConnectedAddress);
+  const { context, isReady, isInFarcaster } = useFarcasterSDK();
+  const { isConnected, address, isConnecting, connectWallet, isOnMonad, switchToMonad } = useFarcasterWallet();
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [mintResult, setMintResult] = useState<{ txHash?: string; tokenId?: string } | null>(null);
@@ -32,7 +35,7 @@ function MonadfolioApp() {
     getVisibleAssets,
     getEarnedBadges,
     refreshPortfolio
-  } = usePortfolio(connectedAddress, context?.user);
+  } = usePortfolio(address || null, context?.user);
 
   const {
     news,
@@ -45,26 +48,8 @@ function MonadfolioApp() {
   const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
   const isAppEnabled = appEnabledEnv !== 'false';
 
-  // Update connected address when Farcaster wallet connects
-  useEffect(() => {
-    if (farcasterConnectedAddress && !connectedAddress) {
-      console.log('🔗 Using Farcaster connected address:', farcasterConnectedAddress);
-      setConnectedAddress(farcasterConnectedAddress);
-    }
-  }, [farcasterConnectedAddress, connectedAddress]);
-
-  // Manual connect for non-Farcaster users or manual override
-  const handleManualConnect = async () => {
-    const address = await connectWallet();
-    if (address) {
-      setConnectedAddress(address);
-    }
-  };
-
-  const handleAddressInput = (address: string) => {
-    console.log('📝 Manual wallet connection:', address);
-    setConnectedAddress(address);
-  };
+  const [manualAddress, setManualAddress] = useState<string | null>(null);
+  const connectedAddress = address || manualAddress;
 
   const handleMintPortfolioNFT = async () => {
     if (!portfolio) return;
@@ -244,17 +229,17 @@ Built on @monad testnet 🚀
   };
 
   // Show loading screen until SDK is ready
-  if (!isReady || autoConnecting) {
+  if (!isReady || (isInFarcaster && isConnecting)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
           <p className="text-gray-600">
-            {isInFarcaster && autoConnecting ? 'Connecting your Farcaster wallet...' : 'Loading Monadfolio...'}
+            {isInFarcaster && isConnecting ? 'Connecting your Farcaster wallet...' : 'Loading Monadfolio...'}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            {isInFarcaster && autoConnecting ? 'Fetching your Monad wallet address...' : 'Initializing application...'}
+            {isInFarcaster && isConnecting ? 'Fetching your Monad wallet address...' : 'Initializing application...'}
           </p>
           {isInFarcaster && context?.user && (
             <div className="mt-4 flex items-center justify-center space-x-2">
@@ -301,25 +286,16 @@ Built on @monad testnet 🚀
         {/* Wallet Connection */}
         {!connectedAddress ? (
           <div className="max-w-md mx-auto">
-            {/* Show connection error for Farcaster users */}
-            {isInFarcaster && connectionError && (
-              <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <div className="text-yellow-800 font-semibold mb-2">⚠️ Wallet Connection Issue</div>
-                <p className="text-sm text-yellow-700 mb-3">{connectionError}</p>
-                <button
-                  onClick={retryConnection}
-                  className="w-full bg-yellow-600 text-white py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors duration-200"
-                >
-                  Retry Connection
-                </button>
-              </div>
-            )}
             <WalletConnect 
-              onConnect={handleAddressInput}
-              onWalletConnect={handleManualConnect}
+              onConnect={setManualAddress}
+              onWalletConnect={connectWallet}
               isInFarcaster={isInFarcaster}
               farcasterUser={context?.user}
-              connectionError={connectionError}
+              isConnected={isConnected}
+              isConnecting={isConnecting}
+              walletAddress={address}
+              isOnMonad={isOnMonad}
+              onSwitchToMonad={switchToMonad}
             />
           </div>
         ) : (
@@ -432,7 +408,7 @@ Built on @monad testnet 🚀
                       <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                       <div>
                         <div className="text-white text-sm font-medium">
-                          {context?.user ? 'Farcaster + ' : ''}Monad Testnet
+                          {isInFarcaster ? 'Farcaster + ' : ''}{isOnMonad ? 'Monad Testnet' : 'Wrong Network'}
                         </div>
                         <div className="text-purple-200 text-xs font-mono">
                           {connectedAddress}
@@ -560,9 +536,11 @@ Built on @monad testnet 🚀
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <MonadfolioApp />
-    </QueryClientProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <MonadfolioApp />
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 
