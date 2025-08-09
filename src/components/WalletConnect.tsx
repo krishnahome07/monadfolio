@@ -18,7 +18,6 @@ interface WalletConnectProps {
 export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
   onWalletConnect,
-  isConnecting,
   error: connectionError,
   farcasterUser,
   isConnected,
