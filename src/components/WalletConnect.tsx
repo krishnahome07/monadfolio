@@ -8,6 +8,7 @@ interface WalletConnectProps {
   onWalletConnect?: () => void;
   isInFarcaster: boolean;
   farcasterUser?: Context.User;
+  connectionError?: string | null;
 }
 
 export const WalletConnect: React.FC<WalletConnectProps> = ({
@@ -15,6 +16,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   onWalletConnect,
   isInFarcaster,
   farcasterUser
+  connectionError
 }) => {
   const [manualAddress, setManualAddress] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -102,7 +104,11 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
       <div className="p-6 space-y-6">
         {/* Farcaster User Info */}
         {isInFarcaster && farcasterUser && (
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+          <div className={`border rounded-xl p-4 ${
+            connectionError 
+              ? 'bg-yellow-50 border-yellow-200' 
+              : 'bg-purple-50 border-purple-200'
+          }`}>
             <div className="flex items-center space-x-3">
               {farcasterUser.pfpUrl ? (
                 <img
@@ -124,13 +130,23 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
                 )}
               </div>
             </div>
-            <p className="text-sm text-purple-600 mt-2">✨ Your Farcaster profile will enhance your portfolio experience!</p>
+            <p className={`text-sm mt-2 ${
+              connectionError 
+                ? 'text-yellow-600' 
+                : 'text-purple-600'
+            }`}>
+              {connectionError 
+                ? '⚠️ Wallet connection failed. Please connect manually or retry.'
+                : '✨ Your Farcaster account is connected! Wallet connection in progress...'}
+            </p>
           </div>
         )}
 
         {/* Auto Connect Option */}
-        {!isInFarcaster ? (
+        {!isInFarcaster || connectionError ? (
           <div className="space-y-4">
+            {!isInFarcaster && (
+              <>
             <button
               onClick={handleSearchAddress}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center space-x-2"
@@ -138,55 +154,45 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               <Search className="w-5 h-5" />
               <span>Search Monad Address</span>
             </button>
+              </>
+            )}
             
             <button
               onClick={handleWalletConnect}
               disabled={isValidating}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
+              className={`w-full text-white py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+                isInFarcaster && connectionError
+                  ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700'
+                  : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+              }`}
             >
               {isValidating ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Connecting...</span>
+                  <span>{isInFarcaster ? 'Retrying...' : 'Connecting...'}</span>
                 </>
               ) : (
                 <>
                   <Zap className="w-4 h-4" />
-                  <span>Connect My Wallet</span>
+                  <span>{isInFarcaster && connectionError ? 'Retry Wallet Connection' : 'Connect My Wallet'}</span>
                 </>
               )}
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="space-y-4 text-center">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-green-800 font-semibold">Farcaster Wallet Connected</span>
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-blue-800 font-semibold">Farcaster Account Connected</span>
               </div>
-              <p className="text-sm text-green-700">
-                Your wallet was automatically connected via Farcaster. 
-                Real Monad blockchain data is being fetched.
+              <p className="text-sm text-blue-700">
+                Your Farcaster account is connected. Wallet connection should happen automatically.
               </p>
             </div>
-            
-            <button
-              onClick={handleWalletConnect}
-              disabled={isValidating}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2"
-            >
-              {isValidating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Reconnecting...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>Refresh Connection</span>
-                </>
-              )}
-            </button>
+            <div className="text-sm text-gray-600">
+              <div className="animate-pulse">🔄 Connecting to your Monad wallet...</div>
+            </div>
           </div>
         )}
 

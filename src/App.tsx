@@ -14,7 +14,7 @@ import { Wallet, Award, Newspaper, Settings, Share2, ExternalLink } from 'lucide
 const queryClient = new QueryClient();
 
 function MonadfolioApp() {
-  const { context, isReady, isInFarcaster, connectedAddress: farcasterConnectedAddress, autoConnecting } = useFarcasterSDK();
+  const { context, isReady, isInFarcaster, connectedAddress: farcasterConnectedAddress, autoConnecting, connectionError, retryConnection } = useFarcasterSDK();
   const [connectedAddress, setConnectedAddress] = useState<string | null>(farcasterConnectedAddress);
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
@@ -244,17 +244,17 @@ Built on @monad testnet 🚀
   };
 
   // Show loading screen until SDK is ready
-  if (!isReady || (isInFarcaster && autoConnecting)) {
+  if (!isReady || autoConnecting) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Monadfolio</h2>
           <p className="text-gray-600">
-            {autoConnecting ? 'Connecting your Farcaster wallet...' : 'Loading your Monad portfolio...'}
+            {isInFarcaster && autoConnecting ? 'Connecting your Farcaster wallet...' : 'Loading Monadfolio...'}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            {autoConnecting ? 'Fetching wallet details...' : 'Initializing Farcaster SDK...'}
+            {isInFarcaster && autoConnecting ? 'Fetching your Monad wallet address...' : 'Initializing application...'}
           </p>
           {isInFarcaster && context?.user && (
             <div className="mt-4 flex items-center justify-center space-x-2">
@@ -301,11 +301,25 @@ Built on @monad testnet 🚀
         {/* Wallet Connection */}
         {!connectedAddress ? (
           <div className="max-w-md mx-auto">
+            {/* Show connection error for Farcaster users */}
+            {isInFarcaster && connectionError && (
+              <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <div className="text-yellow-800 font-semibold mb-2">⚠️ Wallet Connection Issue</div>
+                <p className="text-sm text-yellow-700 mb-3">{connectionError}</p>
+                <button
+                  onClick={retryConnection}
+                  className="w-full bg-yellow-600 text-white py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors duration-200"
+                >
+                  Retry Connection
+                </button>
+              </div>
+            )}
             <WalletConnect 
               onConnect={handleAddressInput}
               onWalletConnect={handleManualConnect}
               isInFarcaster={isInFarcaster}
               farcasterUser={context?.user}
+              connectionError={connectionError}
             />
           </div>
         ) : (
