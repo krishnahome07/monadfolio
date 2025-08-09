@@ -582,18 +582,25 @@ export const connectWallet = async (): Promise<string | null> => {
       console.log('🦊 MetaMask detected, requesting accounts...');
       
       try {
-        // Try to ensure we're on the correct network
-        await checkAndSwitchToMonad();
+        // First request account access
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        
+        if (accounts && accounts.length > 0) {
+          console.log('✅ Wallet accounts found:', accounts[0]);
+          
+          // Try to switch to Monad network after getting accounts
+          try {
+            await checkAndSwitchToMonad();
+            console.log('✅ Switched to Monad testnet');
+          } catch (networkError) {
+            console.warn('⚠️ Network switch failed, but continuing with connected account:', networkError);
+          }
+          
+          return accounts[0];
+        }
       } catch (networkError) {
-        console.warn('⚠️ Network switch failed, continuing with current network:', networkError);
-      }
-      
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
-      
-      if (accounts && accounts.length > 0) {
-        console.log('✅ Wallet connected:', accounts[0]);
-        return accounts[0];
+        console.warn('⚠️ Wallet connection failed:', networkError);
       }
     }
     

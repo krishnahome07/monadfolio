@@ -204,13 +204,15 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             {/* Demo Button for Testing */}
             <button
               onClick={() => {
-                const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
+                const demoAddress = farcasterUser 
+                  ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
+                  : '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
                 setManualAddress(demoAddress);
                 onConnect(demoAddress);
               }}
               className="w-full bg-purple-100 text-purple-700 py-2 rounded-xl font-medium hover:bg-purple-200 transition-colors duration-200 text-sm"
             >
-              🎭 Use Demo Address (for testing)
+              🎭 Use Demo Address {farcasterUser ? '(Farcaster-based)' : '(for testing)'}
             </button>
             </div>
           )}

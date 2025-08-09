@@ -47,7 +47,7 @@ function MonadfolioApp() {
 
   // Auto-connect wallet if user has Farcaster context
   useEffect(() => {
-    if (context?.user && !connectedAddress && isReady) {
+    if (isReady && !connectedAddress) {
       console.log('🎯 Auto-connecting for Farcaster user:', context.user.fid);
       handleAutoConnect();
     }
@@ -55,29 +55,21 @@ function MonadfolioApp() {
 
   const handleAutoConnect = async () => {
     try {
-      // Try wallet connection first
+      console.log('🔌 Starting auto-connect process...');
+      
+      // Always try wallet connection first (for both Farcaster and non-Farcaster users)
       let address = await connectWallet();
       
-      // If no wallet, create demo address
       if (address) {
-        console.log('✅ Wallet connected:', address);
+        console.log('✅ Real wallet connected:', address);
         setConnectedAddress(address);
-      } else if (context?.user) {
-        // Generate demo address from Farcaster user ID
-        const demoAddress = `0x${context.user.fid.toString().padStart(40, '0')}`;
-        console.log('🎭 Using demo address for Farcaster user:', demoAddress);
-        setConnectedAddress(demoAddress);
       } else {
-        // Generate random demo address for non-Farcaster users
-        const demoAddress = `0x${'1234567890abcdef'.repeat(2).padStart(40, '0')}`;
-        console.log('🎭 Using demo address for guest:', demoAddress);
-        setConnectedAddress(demoAddress);
+        console.log('⚠️ No wallet connected - user needs to connect manually');
+        // Don't auto-generate demo addresses - let user connect manually
       }
     } catch (error) {
       console.error('❌ Auto-connect failed:', error);
-      // Still set a demo address so user can explore the app
-      const demoAddress = `0x${'demo123456789'.repeat(3).substring(0, 40)}`;
-      setConnectedAddress(demoAddress);
+      // Don't set demo address on error - let user try again
     }
   };
 
