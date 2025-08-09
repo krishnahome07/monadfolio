@@ -19,6 +19,7 @@ function MonadfolioApp() {
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [mintResult, setMintResult] = useState<{ txHash?: string; tokenId?: string } | null>(null);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'success' | 'error'>('idle');
 
   const { 
     portfolio, 
@@ -85,6 +86,43 @@ function MonadfolioApp() {
     setConnectedAddress(address);
   };
 
+  const handleMintPortfolioNFT = async () => {
+    if (!portfolio) return;
+    
+    setMintingStatus('minting');
+    
+    try {
+      const result = await mintPortfolioNFT(
+        connectedAddress!,
+        portfolio,
+        settings.colorPalette,
+        settings.showTotalValue
+      );
+      
+      setMintResult(result);
+      setMintingStatus('success');
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setMintingStatus('idle');
+        setMintResult(null);
+      }, 5000);
+    } catch (error) {
+      console.error('❌ Minting failed:', error);
+      setMintingStatus('error');
+      
+      // Auto-hide error message after 5 seconds
+      setTimeout(() => {
+        setMintingStatus('idle');
+      }, 5000);
+    }
+  };
+
+  const generatePortfolioImage = async (portfolio: any, colorPalette: string, showTotalValue: boolean) => {
+    // Mock implementation - in real app this would generate an actual image
+    return 'https://via.placeholder.com/800x600/6366f1/ffffff?text=Portfolio+Snapshot';
+  };
+
   const handleSharePortfolio = async () => {
     if (!portfolio) return;
     
@@ -132,9 +170,22 @@ function MonadfolioApp() {
           }
         }
       }
+
+      // Fallback to clipboard
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareText);
+        alert('Portfolio details copied to clipboard!');
+        setShareStatus('success');
+      } else {
+        // Final fallback - show text to copy
+        prompt('Copy this text to share your portfolio:', shareText);
+        setShareStatus('success');
+      }
     } catch (error) {
-      console.error('Share failed:', error);
+      console.error('❌ Share failed:', error);
       setShareStatus('error');
+    } finally {
+      setTimeout(() => setShareStatus('idle'), 3000);
     }
   };
 
@@ -242,14 +293,15 @@ function MonadfolioApp() {
             {/* Tab Content */}
             <div className="max-w-4xl mx-auto">
               {activeTab === 'portfolio' && portfolio && (
-                <Portfolio
+                <PortfolioSnapshot
                   portfolio={portfolio}
                   settings={settings}
                   onSettingsChange={updateSettings}
                   onToggleAsset={toggleAssetVisibility}
-                  onShare={handleSharePortfolio}
+                  onMintNFT={handleMintPortfolioNFT}
                   onRefresh={refreshPortfolio}
                   loading={portfolioLoading}
+                  minting={mintingStatus === 'minting'}
                 />
               )}
 
