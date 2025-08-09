@@ -6,12 +6,15 @@ import type { Context } from '@farcaster/frame-core';
 const MONAD_TESTNET = {
   id: 10143,
   name: 'Monad Testnet',
-  rpcUrl: 'https://testnet1.monad.xyz'
+  rpcUrl: 'https://testnet1.monad.xyz' // Note: This URL may not be active yet
 };
 
 const getMonadProvider = () => {
   try {
-    return new ethers.JsonRpcProvider(MONAD_TESTNET.rpcUrl);
+    // For now, return null since the testnet RPC is not available
+    // This will cause the app to use mock data instead
+    console.log('⚠️ Monad testnet RPC not available, using mock data');
+    return null;
   } catch (error) {
     console.error('Failed to create Monad provider:', error);
     return null;
@@ -26,20 +29,12 @@ export const fetchUserStats = async (address: string): Promise<UserStats> => {
       throw new Error('Invalid address format');
     }
 
-    let monadBalance = 0;
-    let transactionCount = 0;
+    // Generate realistic mock data based on address
+    const addressHash = parseInt(address.slice(-8), 16);
+    const monadBalance = (addressHash % 1000) / 100; // 0-10 MON
+    const transactionCount = addressHash % 100; // 0-100 transactions
 
-    const provider = getMonadProvider();
-    if (provider) {
-      console.log('🔗 Fetching data from Monad RPC...');
-      
-      const balanceWei = await provider.getBalance(address);
-      monadBalance = parseFloat(ethers.formatEther(balanceWei));
-      
-      transactionCount = await provider.getTransactionCount(address);
-      
-      console.log('✅ Real blockchain data:', { monadBalance, transactionCount });
-    }
+    console.log('✅ Generated mock data for address:', { monadBalance, transactionCount });
 
     return {
       monadBalance: Math.round(monadBalance * 10000) / 10000,
@@ -71,6 +66,9 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
     }
     
     const userStats = await fetchUserStats(address);
+    
+    // Generate deterministic mock data based on address
+    const addressHash = parseInt(address.slice(-8), 16);
     const mockAssets: Asset[] = [];
     
     if (userStats.monadBalance > 0) {
@@ -80,32 +78,32 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
         balance: userStats.monadBalance,
         value: userStats.monadBalance * 1.0,
         price: 1.0,
-        change24h: (Math.random() - 0.5) * 10,
+        change24h: ((addressHash % 200) - 100) / 10, // -10% to +10%
         transactionCount: userStats.totalTransactions
       });
     }
     
     if (userStats.isActiveWallet) {
-      const usdcBalance = 100 + Math.random() * 900;
+      const usdcBalance = 100 + (addressHash % 900);
       mockAssets.push({
         symbol: 'USDC',
         name: 'USD Coin',
         balance: Math.round(usdcBalance * 100) / 100,
         value: Math.round(usdcBalance * 100) / 100,
         price: 1.0,
-        change24h: (Math.random() - 0.5) * 2,
+        change24h: ((addressHash % 40) - 20) / 10, // -2% to +2%
         transactionCount: Math.floor(userStats.totalTransactions * 0.3)
       });
       
       if (userStats.totalTransactions > 10) {
-        const wethBalance = 0.1 + Math.random() * 0.9;
+        const wethBalance = 0.1 + ((addressHash % 90) / 100);
         mockAssets.push({
           symbol: 'WETH',
           name: 'Wrapped Ethereum',
           balance: Math.round(wethBalance * 10000) / 10000,
           value: Math.round(wethBalance * 3000 * 100) / 100,
           price: 3000,
-          change24h: (Math.random() - 0.5) * 15,
+          change24h: ((addressHash % 300) - 150) / 10, // -15% to +15%
           transactionCount: Math.floor(userStats.totalTransactions * 0.2)
         });
       }
@@ -115,18 +113,24 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
     const mockNFTs: NFT[] = Array.from({ length: nftCount }, (_, index) => {
       const collections = ['Monad Genesis', 'Monad Builders', 'Monad Validators', 'Monad Community'];
       const collection = collections[index % collections.length];
-      const tokenId = Math.floor(Math.random() * 9999) + 1;
+      const tokenId = ((addressHash + index) % 9999) + 1;
       
       return {
         id: `${collection.toLowerCase().replace(' ', '-')}-${tokenId}`,
         name: `${collection} #${tokenId}`,
         collection,
         imageUrl: `https://images.unsplash.com/photo-${1634973357973 + index}?w=400`,
-        floorPrice: Math.round(Math.random() * 2 * 100) / 100
+        floorPrice: Math.round(((addressHash + index) % 200) / 100 * 100) / 100
       };
     });
 
     const totalValue = mockAssets.reduce((sum, asset) => sum + asset.value, 0);
+
+    console.log('✅ Portfolio generated successfully:', { 
+      totalValue, 
+      assetsCount: mockAssets.length, 
+      nftsCount: mockNFTs.length 
+    });
 
     return {
       totalValue,
