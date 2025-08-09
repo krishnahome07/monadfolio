@@ -39,23 +39,11 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
         console.log('✅ Wallet connected:', address);
         onConnect(address);
       } else {
-        // If no wallet available, generate a demo address for testing
-        const demoAddress = farcasterUser 
-          ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
-          : `0x${'1234567890abcdef'.repeat(2).padStart(40, '0')}`;
-        
-        console.log('🎭 Using demo address:', demoAddress);
-        onConnect(demoAddress);
+        setError('No wallet detected. Please install MetaMask or enter an address manually.');
       }
     } catch (err) {
       console.error('❌ Auto-connect failed:', err);
-      // Generate fallback address instead of showing error
-      const fallbackAddress = farcasterUser 
-        ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
-        : `0x${'fallback123456789'.repeat(2).substring(0, 40)}`;
-      
-      console.log('🔄 Using fallback address:', fallbackAddress);
-      onConnect(fallbackAddress);
+      setError('Failed to connect wallet. Please try again or enter address manually.');
     } finally {
       setIsValidating(false);
     }
@@ -204,15 +192,13 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             {/* Demo Button for Testing */}
             <button
               onClick={() => {
-                const demoAddress = farcasterUser 
-                  ? `0x${farcasterUser.fid.toString().padStart(40, '0')}`
-                  : '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
+                // Use a real Monad testnet address for demo
+                const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
                 setManualAddress(demoAddress);
-                onConnect(demoAddress);
               }}
-              className="w-full bg-purple-100 text-purple-700 py-2 rounded-xl font-medium hover:bg-purple-200 transition-colors duration-200 text-sm"
+              className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-200 text-sm"
             >
-              🎭 Use Demo Address {farcasterUser ? '(Farcaster-based)' : '(for testing)'}
+              📝 Fill Demo Address (for testing)
             </button>
             </div>
           )}
