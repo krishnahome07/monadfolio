@@ -1,8 +1,89 @@
 import { ethers } from 'ethers';
+import { switchChain } from 'viem/actions';
+import { createWalletClient, custom } from 'viem';
 import { Portfolio, Asset, NFT, Badge, UserProfile, NewsItem } from '../types/portfolio';
 
 // Mock Monad RPC endpoint - replace with actual endpoint
 const MONAD_RPC_URL = 'https://rpc.monad.xyz';
+
+// Monad Testnet configuration
+const MONAD_TESTNET = {
+  id: 10143,
+  name: 'Monad Testnet',
+  network: 'monad-testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Monad',
+    symbol: 'MON',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://testnet1.monad.xyz'],
+    },
+    public: {
+      http: ['https://testnet1.monad.xyz'],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Monad Explorer', url: 'https://explorer.testnet1.monad.xyz' },
+  },
+};
+
+export const checkAndSwitchToMonad = async (): Promise<boolean> => {
+  try {
+    if (typeof window === 'undefined' || !window.ethereum) {
+      console.error('No wallet detected');
+      return false;
+    }
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    
+    // Check if already on Monad Testnet
+    if (Number(network.chainId) === MONAD_TESTNET.id) {
+      console.log('✅ Already connected to Monad Testnet');
+      return true;
+    }
+
+    console.log(`🔄 Switching from chain ${network.chainId} to Monad Testnet (${MONAD_TESTNET.id})`);
+    
+    // Create wallet client for viem
+    const walletClient = createWalletClient({
+      transport: custom(window.ethereum)
+    });
+
+    try {
+      // Try to switch to Monad Testnet
+      await switchChain(walletClient, { id: MONAD_TESTNET.id });
+      console.log('✅ Successfully switched to Monad Testnet');
+      return true;
+    } catch (switchError: any) {
+      // If switch fails, try to add the network first
+      if (switchError.code === 4902 || switchError.message?.includes('Unrecognized chain ID')) {
+        console.log('🔧 Adding Monad Testnet to wallet...');
+        
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: `0x${MONAD_TESTNET.id.toString(16)}`,
+            chainName: MONAD_TESTNET.name,
+            nativeCurrency: MONAD_TESTNET.nativeCurrency,
+            rpcUrls: MONAD_TESTNET.rpcUrls.default.http,
+            blockExplorerUrls: [MONAD_TESTNET.blockExplorers.default.url],
+          }],
+        });
+        
+        console.log('✅ Monad Testnet added and switched successfully');
+        return true;
+      }
+      
+      throw switchError;
+    }
+  } catch (error) {
+    console.error('❌ Failed to switch to Monad Testnet:', error);
+    return false;
+  }
+};
 
 // Mock data for development - replace with actual API calls
 export const fetchPortfolio = async (address: string): Promise<Portfolio> => {
