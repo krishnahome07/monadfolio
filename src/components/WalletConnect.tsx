@@ -162,6 +162,8 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
+              <span className="px-2 bg-white text-gray-500">or</span>
+            </div>
           </div>
         )}
 
@@ -206,7 +208,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           >
             📝 Fill Demo Address
           </button>
-        </div>
+        )}
 
         {/* Error Display */}
         {(error || connectionError) && (
