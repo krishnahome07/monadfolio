@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { config } from './config/wagmi';
 import { WalletConnect } from './components/WalletConnect';
 import { PortfolioSnapshot } from './components/PortfolioSnapshot';
 import { BadgeCollection } from './components/BadgeCollection';
 import { MonadNews } from './components/MonadNews';
 import { MaintenanceMode } from './components/MaintenanceMode';
 import { useFarcasterSDK } from './hooks/useFarcasterSDK';
+import { useFarcasterWallet } from './hooks/useFarcasterWallet';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useMonadNews } from './hooks/useMonadNews';
 import { mintPortfolioNFT } from './utils/monadApi';
@@ -14,15 +17,31 @@ import { Wallet, Award, Newspaper } from 'lucide-react';
 const queryClient = new QueryClient();
 
 function MonadfolioApp() {
+  // Add error boundary
   try {
   const { context, isReady, isInFarcaster } = useFarcasterSDK();
+  
+  // Only use wallet connection for Farcaster users
+  const walletHook = useFarcasterWallet();
+  const { isConnected, address, isConnecting, connectWallet, isOnMonad, switchToMonad } = isInFarcaster ? walletHook : {
+    isConnected: false,
+    address: null,
+    isConnecting: false,
+    connectWallet: () => {},
+    isOnMonad: true, // Assume true for non-Farcaster users
+    switchToMonad: () => {}
+  };
   
   const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
   const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [manualAddress, setManualAddress] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
-  const connectedAddress = manualAddress;
+  // Debug logging
+  console.log('App.tsx - isInFarcaster:', isInFarcaster);
+  console.log('App.tsx - context:', context);
+
+  const connectedAddress = isInFarcaster ? (address || manualAddress) : manualAddress;
 
   const { 
     portfolio, 
@@ -40,8 +59,10 @@ function MonadfolioApp() {
   const handleManualConnect = (inputAddress: string) => {
     setConnectionError(null);
     try {
+      console.log('🔍 Connecting to manual address:', inputAddress);
       setManualAddress(inputAddress);
     } catch (error) {
+      console.error('❌ Failed to connect to address:', error);
       setConnectionError('Failed to connect to the provided address');
     }
   };
@@ -66,6 +87,7 @@ function MonadfolioApp() {
         throw new Error(result.error || 'Minting failed');
       }
     } catch (error) {
+      console.error('❌ NFT minting failed:', error);
       setMintingStatus('error');
       setTimeout(() => setMintingStatus('idle'), 3000);
     }
@@ -106,6 +128,12 @@ function MonadfolioApp() {
           <p className="text-purple-200 text-lg">
             Your Monad portfolio & on-chain identity
           </p>
+          {isInFarcaster && (
+            <div className="mt-2 inline-flex items-center space-x-2 bg-purple-800 bg-opacity-50 text-purple-200 px-3 py-1 rounded-full text-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Connected via Farcaster</span>
+            </div>
+          )}
         </div>
 
         {/* Wallet Connection */}
@@ -113,7 +141,15 @@ function MonadfolioApp() {
           <div className="max-w-md mx-auto">
             <WalletConnect 
               onConnect={handleManualConnect}
+              onWalletConnect={isInFarcaster ? connectWallet : () => {}}
+              isInFarcaster={isInFarcaster}
+              farcasterUser={context?.user}
+              isConnected={isInFarcaster ? isConnected : false}
+              isConnecting={isInFarcaster ? isConnecting : false}
               connectionError={connectionError}
+              walletAddress={isInFarcaster ? address : undefined}
+              isOnMonad={isInFarcaster ? isOnMonad : true}
+              onSwitchToMonad={isInFarcaster ? switchToMonad : () => {}}
             />
           </div>
         ) : (
@@ -207,7 +243,7 @@ function MonadfolioApp() {
                       <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                       <div>
                         <div className="text-white text-sm font-medium">
-                          Portfolio Viewer
+                          {isInFarcaster ? `Farcaster + ${isOnMonad ? 'Monad Testnet' : 'Wrong Network'}` : 'Monad Portfolio'}
                         </div>
                         <div className="text-purple-200 text-xs font-mono">
                           {connectedAddress}
@@ -215,6 +251,28 @@ function MonadfolioApp() {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Farcaster User Info */}
+                  {isInFarcaster && context?.user && (
+                    <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+                      <div className="flex items-center justify-center space-x-2">
+                        {context.user.pfpUrl ? (
+                          <img
+                            src={context.user.pfpUrl}
+                            alt="Profile"
+                            className="w-6 h-6 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs">👤</span>
+                          </div>
+                        )}
+                        <div className="text-white text-sm">
+                          {context.user.displayName || context.user.username || `User ${context.user.fid}`}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -237,9 +295,11 @@ function MonadfolioApp() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <MonadfolioApp />
-    </QueryClientProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <MonadfolioApp />
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 
