@@ -132,7 +132,11 @@ function MonadfolioApp() {
           }
         }
       }
-
+    } catch (error) {
+      console.error('Share failed:', error);
+      setShareStatus('error');
+    }
+  };
 
   const handleShareBadges = async () => {
     const earnedBadges = getEarnedBadges();
@@ -238,15 +242,14 @@ function MonadfolioApp() {
             {/* Tab Content */}
             <div className="max-w-4xl mx-auto">
               {activeTab === 'portfolio' && portfolio && (
-                <PortfolioSnapshot
+                <Portfolio
                   portfolio={portfolio}
                   settings={settings}
                   onSettingsChange={updateSettings}
                   onToggleAsset={toggleAssetVisibility}
-                  onMintNFT={handleMintPortfolioNFT}
+                  onShare={handleSharePortfolio}
                   onRefresh={refreshPortfolio}
                   loading={portfolioLoading}
-                  minting={mintingStatus === 'minting'}
                 />
               )}
 
@@ -313,32 +316,6 @@ function MonadfolioApp() {
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span>Connected: {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}</span>
               </div>
-              
-              {/* Minting Status */}
-              {mintingStatus === 'success' && mintResult && (
-                <div className="mt-4 max-w-md mx-auto bg-green-50 border border-green-200 rounded-xl p-4">
-                  <div className="text-green-800 font-semibold mb-2">🎉 NFT Minted Successfully!</div>
-                  <div className="text-sm text-green-700 space-y-1">
-                    <div>Token ID: #{mintResult.tokenId}</div>
-                    <div className="flex items-center justify-center space-x-2">
-                      <span>Tx: {mintResult.txHash?.slice(0, 10)}...</span>
-                      <button
-                        onClick={() => window.open(`https://explorer.monad.xyz/tx/${mintResult.txHash}`, '_blank')}
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {mintingStatus === 'error' && (
-                <div className="mt-4 max-w-md mx-auto bg-red-50 border border-red-200 rounded-xl p-4">
-                  <div className="text-red-800 font-semibold">❌ NFT Minting Failed</div>
-                  <div className="text-sm text-red-700 mt-1">Please try again later</div>
-                </div>
-              )}
             </div>
           </div>
         )}
