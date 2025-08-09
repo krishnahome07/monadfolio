@@ -62,7 +62,6 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
     setManualAddress(demoAddress);
     onConnect(demoAddress);
   };
-  const [error, setError] = useState<string | null>(null);
 
   const handleManualConnect = async () => {
     setError(null);
