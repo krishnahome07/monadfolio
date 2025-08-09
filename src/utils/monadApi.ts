@@ -2,22 +2,55 @@ import { ethers } from 'ethers';
 import { Portfolio, Asset, NFT, Badge, NewsItem, UserStats } from '../types/portfolio';
 import type { Context } from '@farcaster/frame-core';
 
-// Monad Testnet configuration
-const MONAD_TESTNET = {
-  id: 10143,
-  name: 'Monad Testnet',
-  rpcUrl: 'https://testnet1.monad.xyz' // Note: This URL may not be active yet
-};
+// Alternative RPC endpoints to try
+const RPC_ENDPOINTS = [
+  'https://testnet1.monad.xyz',
+  'https://rpc.testnet.monad.xyz',
+  'https://testnet-rpc.monad.xyz'
+];
+
+// Fallback to Ethereum mainnet for demonstration
+const FALLBACK_RPC = 'https://eth.llamarpc.com';
 
 const getMonadProvider = () => {
   try {
-    // For now, return null since the testnet RPC is not available
-    // This will cause the app to use mock data instead
-    console.log('⚠️ Monad testnet RPC not available, using mock data');
-    return null;
+    // Try to create provider with fallback RPC
+    console.log('🔗 Attempting to connect to blockchain...');
+    return new ethers.JsonRpcProvider(FALLBACK_RPC);
   } catch (error) {
-    console.error('Failed to create Monad provider:', error);
+    console.error('Failed to create blockchain provider:', error);
     return null;
+  }
+};
+
+const getTokenBalance = async (provider: ethers.JsonRpcProvider, address: string, tokenAddress?: string): Promise<number> => {
+  try {
+    if (!tokenAddress) {
+      // Get ETH balance
+      const balance = await provider.getBalance(address);
+      return parseFloat(ethers.formatEther(balance));
+    } else {
+      // Get ERC-20 token balance (simplified)
+      const contract = new ethers.Contract(
+        tokenAddress,
+        ['function balanceOf(address) view returns (uint256)'],
+        provider
+      );
+      const balance = await contract.balanceOf(address);
+      return parseFloat(ethers.formatEther(balance));
+    }
+  } catch (error) {
+    console.error('Error fetching token balance:', error);
+    return 0;
+  }
+};
+
+const getTransactionCount = async (provider: ethers.JsonRpcProvider, address: string): Promise<number> => {
+  try {
+    return await provider.getTransactionCount(address);
+  } catch (error) {
+    console.error('Error fetching transaction count:', error);
+    return 0;
   }
 };
 
@@ -29,31 +62,31 @@ export const fetchUserStats = async (address: string): Promise<UserStats> => {
       throw new Error('Invalid address format');
     }
 
-    // Generate realistic mock data based on address
-    const addressHash = parseInt(address.slice(-8), 16);
-    const monadBalance = (addressHash % 1000) / 100; // 0-10 MON
-    const transactionCount = addressHash % 100; // 0-100 transactions
+    const provider = getMonadProvider();
+    if (!provider) {
+      throw new Error('Unable to connect to blockchain');
+    }
 
-    console.log('✅ Generated mock data for address:', { monadBalance, transactionCount });
+    // Fetch real blockchain data
+    const [ethBalance, transactionCount] = await Promise.all([
+      getTokenBalance(provider, address),
+      getTransactionCount(provider, address)
+    ]);
+
+    console.log('✅ Fetched real blockchain data:', { ethBalance, transactionCount });
 
     return {
-      monadBalance: Math.round(monadBalance * 10000) / 10000,
+      monadBalance: Math.round(ethBalance * 10000) / 10000,
       totalTransactions: transactionCount,
-      isActiveWallet: transactionCount > 0 || monadBalance > 0,
+      isActiveWallet: transactionCount > 0 || ethBalance > 0,
       firstTransactionDate: transactionCount > 0 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : undefined,
-      stakingAmount: Math.round(monadBalance * 0.1 * 10000) / 10000,
-      activeProtocols: transactionCount > 5 ? ['MonadSwap', 'MonadLend'] : transactionCount > 0 ? ['MonadSwap'] : []
+      stakingAmount: Math.round(ethBalance * 0.1 * 10000) / 10000,
+      activeProtocols: transactionCount > 10 ? ['DeFi Protocol', 'DEX'] : transactionCount > 0 ? ['DEX'] : []
     };
     
   } catch (error) {
     console.error('❌ Error fetching user stats:', error);
-    return {
-      monadBalance: 0,
-      totalTransactions: 0,
-      isActiveWallet: false,
-      stakingAmount: 0,
-      activeProtocols: []
-    };
+    throw new Error(`Failed to fetch user stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -66,76 +99,42 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
     }
     
     const userStats = await fetchUserStats(address);
+    const provider = getMonadProvider();
     
-    // Generate deterministic mock data based on address
-    const addressHash = parseInt(address.slice(-8), 16);
-    const mockAssets: Asset[] = [];
+    if (!provider) {
+      throw new Error('Unable to connect to blockchain');
+    }
     
+    const assets: Asset[] = [];
+    
+    // Add ETH balance
     if (userStats.monadBalance > 0) {
-      mockAssets.push({
-        symbol: 'MON',
-        name: 'Monad',
+      assets.push({
+        symbol: 'ETH',
+        name: 'Ethereum',
         balance: userStats.monadBalance,
-        value: userStats.monadBalance * 1.0,
-        price: 1.0,
-        change24h: ((addressHash % 200) - 100) / 10, // -10% to +10%
+        value: userStats.monadBalance * 3000, // Approximate ETH price
+        price: 3000,
+        change24h: Math.random() * 10 - 5, // -5% to +5%
         transactionCount: userStats.totalTransactions
       });
     }
     
-    if (userStats.isActiveWallet) {
-      const usdcBalance = 100 + (addressHash % 900);
-      mockAssets.push({
-        symbol: 'USDC',
-        name: 'USD Coin',
-        balance: Math.round(usdcBalance * 100) / 100,
-        value: Math.round(usdcBalance * 100) / 100,
-        price: 1.0,
-        change24h: ((addressHash % 40) - 20) / 10, // -2% to +2%
-        transactionCount: Math.floor(userStats.totalTransactions * 0.3)
-      });
-      
-      if (userStats.totalTransactions > 10) {
-        const wethBalance = 0.1 + ((addressHash % 90) / 100);
-        mockAssets.push({
-          symbol: 'WETH',
-          name: 'Wrapped Ethereum',
-          balance: Math.round(wethBalance * 10000) / 10000,
-          value: Math.round(wethBalance * 3000 * 100) / 100,
-          price: 3000,
-          change24h: ((addressHash % 300) - 150) / 10, // -15% to +15%
-          transactionCount: Math.floor(userStats.totalTransactions * 0.2)
-        });
-      }
-    }
-    
-    const nftCount = userStats.isActiveWallet ? Math.min(Math.floor(userStats.totalTransactions / 10), 5) : 0;
-    const mockNFTs: NFT[] = Array.from({ length: nftCount }, (_, index) => {
-      const collections = ['Monad Genesis', 'Monad Builders', 'Monad Validators', 'Monad Community'];
-      const collection = collections[index % collections.length];
-      const tokenId = ((addressHash + index) % 9999) + 1;
-      
-      return {
-        id: `${collection.toLowerCase().replace(' ', '-')}-${tokenId}`,
-        name: `${collection} #${tokenId}`,
-        collection,
-        imageUrl: `https://images.unsplash.com/photo-${1634973357973 + index}?w=400`,
-        floorPrice: Math.round(((addressHash + index) % 200) / 100 * 100) / 100
-      };
-    });
+    // For now, NFTs will be empty since we need specific NFT contract addresses
+    const nfts: NFT[] = [];
 
-    const totalValue = mockAssets.reduce((sum, asset) => sum + asset.value, 0);
+    const totalValue = assets.reduce((sum, asset) => sum + asset.value, 0);
 
     console.log('✅ Portfolio generated successfully:', { 
       totalValue, 
-      assetsCount: mockAssets.length, 
-      nftsCount: mockNFTs.length 
+      assetsCount: assets.length, 
+      nftsCount: nfts.length 
     });
 
     return {
       totalValue,
-      assets: mockAssets,
-      nfts: mockNFTs,
+      assets,
+      nfts,
       lastUpdated: new Date(),
       userStats
     };
@@ -152,26 +151,26 @@ export const fetchUserBadges = async (
 ): Promise<Badge[]> => {
   const badges: Badge[] = [
     {
-      id: 'monad-pioneer',
-      name: 'Monad Pioneer',
-      description: 'Holds NFT from earliest Monad collections',
+      id: 'crypto-holder',
+      name: 'Crypto Holder',
+      description: 'Holds cryptocurrency in wallet',
       icon: '🏆',
-      category: 'nft',
-      earned: portfolio.nfts.some(nft => nft.collection === 'Monad Genesis'),
-      rarity: 'legendary'
+      category: 'portfolio',
+      earned: (portfolio.userStats?.monadBalance || 0) > 0,
+      rarity: 'common'
     },
     {
       id: 'collector',
       name: 'Collector',
-      description: 'Holds NFTs from 3+ different collections',
+      description: 'Holds multiple types of assets',
       icon: '🎨',
-      category: 'nft',
-      earned: new Set(portfolio.nfts.map(nft => nft.collection)).size >= 3,
+      category: 'portfolio',
+      earned: portfolio.assets.length >= 2,
       rarity: 'rare'
     },
     {
-      id: 'monad-whale',
-      name: 'Monad Whale',
+      id: 'crypto-whale',
+      name: 'Crypto Whale',
       description: 'Portfolio value exceeds $1,000',
       icon: '🐋',
       category: 'portfolio',
@@ -179,9 +178,9 @@ export const fetchUserBadges = async (
       rarity: 'rare'
     },
     {
-      id: 'monad-holder',
-      name: 'Monad Holder',
-      description: 'Holds MON tokens in wallet',
+      id: 'eth-holder',
+      name: 'ETH Holder',
+      description: 'Holds ETH in wallet',
       icon: '💎',
       category: 'portfolio',
       earned: (portfolio.userStats?.monadBalance || 0) > 0,
@@ -220,28 +219,28 @@ export const fetchMonadNews = async (): Promise<NewsItem[]> => {
   return [
     {
       id: '1',
-      title: 'Monad Testnet Launches with Record-Breaking Performance',
-      summary: 'The highly anticipated Monad testnet goes live, demonstrating unprecedented transaction throughput and low latency.',
-      url: 'https://monad.xyz',
-      source: 'Monad Official',
+      title: 'Ethereum Network Upgrade Improves Scalability',
+      summary: 'Latest Ethereum improvements bring better transaction throughput and reduced gas fees for users.',
+      url: 'https://ethereum.org',
+      source: 'Ethereum Foundation',
       publishedAt: new Date('2024-01-15T10:00:00Z'),
       category: 'official'
     },
     {
       id: '2',
-      title: 'Major DeFi Protocol Announces Monad Integration',
-      summary: 'Leading decentralized exchange confirms plans to deploy on Monad mainnet, citing superior performance metrics.',
-      url: 'https://monad.xyz',
+      title: 'DeFi Protocol Announces New Features',
+      summary: 'Leading decentralized exchange introduces new trading features and improved user experience.',
+      url: 'https://ethereum.org',
       source: 'DeFi Pulse',
       publishedAt: new Date('2024-01-14T14:30:00Z'),
       category: 'ecosystem'
     },
     {
       id: '3',
-      title: 'Monad Developer Grants Program Opens Applications',
-      summary: 'The Monad Foundation launches a $10M grants program to support ecosystem development and innovation.',
-      url: 'https://monad.xyz',
-      source: 'Monad Foundation',
+      title: 'Blockchain Developer Grants Program Opens Applications',
+      summary: 'New grants program launches to support ecosystem development and innovation in blockchain technology.',
+      url: 'https://ethereum.org',
+      source: 'Blockchain Foundation',
       publishedAt: new Date('2024-01-13T09:15:00Z'),
       category: 'official'
     }
@@ -256,6 +255,11 @@ export const mintPortfolioNFT = async (
 ): Promise<{ success: boolean; txHash?: string; tokenId?: string; error?: string }> => {
   try {
     console.log('🎨 Starting portfolio NFT minting process...');
+    
+    const provider = getMonadProvider();
+    if (!provider) {
+      throw new Error('Unable to connect to blockchain for minting');
+    }
     
     await new Promise(resolve => setTimeout(resolve, 3000));
     
