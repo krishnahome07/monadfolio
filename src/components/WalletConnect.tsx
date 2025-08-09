@@ -132,8 +132,8 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
         )}
 
-        {/* Connect Button */}
-        {!isConnected && (
+        {/* Connect Button - Only show for Farcaster users */}
+        {!isConnected && isInFarcaster && (
           <button
             onClick={onWalletConnect}
             disabled={isConnecting}
@@ -153,19 +153,21 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </button>
         )}
 
-        {/* Manual Address Entry */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+        {/* Manual Address Entry - Show divider only for Farcaster users */}
+        {isInFarcaster && (
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">or</span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">or</span>
-          </div>
-        </div>
+        )}
 
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
-            Search Monad Address
+            {isInFarcaster ? 'Search Monad Address' : 'Enter Monad Address'}
           </label>
           <input
             type="text"
