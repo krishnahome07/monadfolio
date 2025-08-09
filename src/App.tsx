@@ -266,6 +266,16 @@ function MonadfolioApp() {
       </div>
     </div>
   );
+  } catch (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
+          <div className="text-red-600 mb-4">⚠️ Error</div>
+          <p className="text-gray-600">Something went wrong loading the app.</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 function App() {
