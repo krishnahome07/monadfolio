@@ -26,6 +26,10 @@ function MonadfolioApp() {
   const [manualAddress, setManualAddress] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
+  // Debug logging
+  console.log('App.tsx - isInFarcaster:', isInFarcaster);
+  console.log('App.tsx - context:', context);
+
   const connectedAddress = address || manualAddress;
 
   const { 
@@ -131,7 +135,7 @@ function MonadfolioApp() {
               farcasterUser={context?.user}
               isConnected={isConnected}
               isConnecting={isConnecting}
-              error={connectionError}
+              connectionError={connectionError}
               walletAddress={address}
               isOnMonad={isOnMonad}
               onSwitchToMonad={switchToMonad}

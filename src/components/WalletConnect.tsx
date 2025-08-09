@@ -10,6 +10,7 @@ interface WalletConnectProps {
   farcasterUser?: Context.User;
   isConnected: boolean;
   isConnecting: boolean;
+  connectionError?: string | null;
   walletAddress?: string;
   isOnMonad: boolean;
   onSwitchToMonad: () => void;
@@ -19,7 +20,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
   onWalletConnect,
   isInFarcaster,
-  error: connectionError,
+  connectionError,
   farcasterUser,
   isConnected,
   isConnecting,
@@ -27,6 +28,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   isOnMonad,
   onSwitchToMonad
 }) => {
+  // Debug logging
+  console.log('WalletConnect - isInFarcaster:', isInFarcaster);
+  console.log('WalletConnect - farcasterUser:', farcasterUser);
+
   const [manualAddress, setManualAddress] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
