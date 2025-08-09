@@ -6,17 +6,17 @@ import type { Context } from '@farcaster/frame-core';
 const MONAD_TESTNET = {
   id: 10143,
   name: 'Monad Testnet',
-  rpcUrl: 'https://testnet-rpc.monad.xyz'
+  rpcUrl: 'https://testnet1.monad.xyz' // Note: This URL may not be active yet
 };
 
 const getMonadProvider = () => {
   try {
-    // Try to create provider with the testnet RPC
-    console.log('🔗 Attempting to connect to Monad testnet RPC...');
-    const provider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpcUrl);
-    return provider;
+    // For now, return null since the testnet RPC is not available
+    // This will cause the app to use mock data instead
+    console.log('⚠️ Monad testnet RPC not available, using mock data');
+    return null;
   } catch (error) {
-    console.error('❌ Failed to create Monad provider, using mock data:', error);
+    console.error('Failed to create Monad provider:', error);
     return null;
   }
 };

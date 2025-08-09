@@ -14,14 +14,14 @@ export const monadTestnet = {
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet-rpc.monad.xyz'],
+      http: ['https://testnet1.monad.xyz'],
     },
     public: {
-      http: ['https://testnet-rpc.monad.xyz'],
+      http: ['https://testnet1.monad.xyz'],
     },
   },
   blockExplorers: {
-    default: { name: 'Monad Explorer', url: 'https://explorer.testnet.monad.xyz' },
+    default: { name: 'Monad Explorer', url: 'https://testnet.monadexplorer.com' },
   },
 } as const
 
