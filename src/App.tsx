@@ -415,17 +415,74 @@ Built on @monad testnet 🚀
 
             {/* Connected Wallet Info */}
             <div className="text-center">
-              <div className="inline-flex items-center space-x-2 bg-white bg-opacity-10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span>
-                  {context?.user ? 'Farcaster + ' : ''}
-                  {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}
-                </span>
-                {context?.user && (
-                  <div className="text-xs bg-purple-600 px-2 py-1 rounded-full">
-                    @{context.user.username || `fid:${context.user.fid}`}
+              {/* Wallet Address Display with Copy */}
+              <div className="mb-4">
+                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-4 max-w-md mx-auto">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      <div>
+                        <div className="text-white text-sm font-medium">
+                          {context?.user ? 'Farcaster + ' : ''}Monad Testnet
+                        </div>
+                        <div className="text-purple-200 text-xs font-mono">
+                          {connectedAddress}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(connectedAddress);
+                          // Show temporary success feedback
+                          const button = document.activeElement as HTMLButtonElement;
+                          const originalText = button.innerHTML;
+                          button.innerHTML = '<svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
+                          setTimeout(() => {
+                            button.innerHTML = originalText;
+                          }, 2000);
+                        } catch (error) {
+                          console.error('Failed to copy address:', error);
+                          // Fallback for browsers that don't support clipboard API
+                          prompt('Copy this address:', connectedAddress);
+                        }
+                      }}
+                      className="p-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all duration-200 group"
+                      title="Copy address"
+                    >
+                      <svg className="w-4 h-4 text-white group-hover:text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
                   </div>
-                )}
+                  
+                  {/* Farcaster User Info */}
+                  {context?.user && (
+                    <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+                      <div className="flex items-center justify-center space-x-2">
+                        {context.user.pfpUrl ? (
+                          <img
+                            src={context.user.pfpUrl}
+                            alt="Profile"
+                            className="w-6 h-6 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs">👤</span>
+                          </div>
+                        )}
+                        <div className="text-white text-sm">
+                          {context.user.displayName || context.user.username || `User ${context.user.fid}`}
+                        </div>
+                        {context.user.username && (
+                          <div className="text-xs bg-purple-600 px-2 py-1 rounded-full text-purple-100">
+                            @{context.user.username}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* User Stats Display */}
