@@ -98,7 +98,7 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
               {settings.showTotalValue ? `$${totalVisibleValue.toLocaleString()}` : '••••••'}
             </div>
             <div className="text-purple-100">
-              {visibleAssets.length} assets • {portfolio.nfts.length} NFTs • {portfolio.userStats?.totalTransactions || 0} txns
+              {visibleAssets.length} assets • {portfolio.nfts.length} NFTs • {portfolio.userStats?.totalTransactions || 0} transactions
             </div>
           </div>
           <button

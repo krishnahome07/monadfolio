@@ -17,11 +17,21 @@ export interface NFT {
   floorPrice?: number;
 }
 
+export interface UserStats {
+  monadBalance: number;
+  totalTransactions: number;
+  isActiveWallet: boolean;
+  firstTransactionDate?: Date;
+  stakingAmount: number;
+  activeProtocols: string[];
+}
+
 export interface Portfolio {
   totalValue: number;
   assets: Asset[];
   nfts: NFT[];
   lastUpdated: Date;
+  userStats?: UserStats;
 }
 
 export interface Badge {
