@@ -162,8 +162,6 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
           </div>
         )}
 
@@ -180,7 +178,6 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
           />
           <button
-            onClick={handleManualConnect}
             disabled={isValidating}
             onClick={handleManualConnect}
             className="w-full bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center space-x-2"
@@ -199,7 +196,6 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           </button>
           
           <button
-            onClick={handleDemoAddress}
             onClick={() => {
               const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
               setManualAddress(demoAddress);
@@ -208,19 +204,12 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           >
             📝 Fill Demo Address
           </button>
-        )}
+        </div>
 
         {/* Error Display */}
         {(error || connectionError) && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <div className="text-red-800 text-sm">{error || connectionError}</div>
-          </div>
-        )}
-
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="text-red-800 text-sm">{error}</div>
           </div>
         )}
       </div>
