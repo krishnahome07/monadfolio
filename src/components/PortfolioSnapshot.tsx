@@ -66,7 +66,7 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
           <div className="flex items-center space-x-3">
             <Wallet className="w-8 h-8" />
             <div>
-              <h2 className="text-2xl font-bold">Portfolio Snapshot</h2>
+              <h2 className="text-2xl font-bold">Portfolio</h2>
               <p className="text-purple-100">
                 Last updated: {portfolio.lastUpdated.toLocaleTimeString()}
               </p>

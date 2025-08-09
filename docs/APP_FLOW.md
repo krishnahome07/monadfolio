@@ -113,7 +113,7 @@ if (!isAppEnabled) {
 - **Features**: Auto-connect, manual address entry, demo mode
 - **Behavior**: Shows different UI based on Farcaster vs standalone usage
 
-### **2. `src/components/PortfolioSnapshot.tsx`**
+### **2. `src/components/Portfolio.tsx`**
 - **Purpose**: Main portfolio visualization with colored blocks
 - **Functionality**: Asset visualization, privacy controls, sharing
 - **State**: Manages portfolio settings and asset visibility

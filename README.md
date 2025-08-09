@@ -10,7 +10,7 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 
 ## ✨ Core Features
 
-### 📊 Portfolio Snapshot
+### 📊 Portfolio
 - **Visual Portfolio**: Stunning colored block visualization where each block's size represents your asset allocation
 - **Real-time Data**: Live connection to Monad blockchain for up-to-date portfolio information
 - **Customization**: Multiple pre-defined color palettes for personalized visualization

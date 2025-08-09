@@ -253,7 +253,7 @@ function MonadfolioApp() {
             {/* Tab Content */}
             <div className="max-w-4xl mx-auto">
               {activeTab === 'portfolio' && portfolio && (
-                <PortfolioSnapshot
+                <Portfolio
                   portfolio={portfolio}
                   settings={settings}
                   onSettingsChange={updateSettings}
