@@ -238,10 +238,10 @@ export const mintPortfolioNFT = async (
   }
 };
 
-export const validateMonadAddress = (address: string): boolean => {
+export const validateAddress = (address: string): boolean => {
   try {
     return ethers.isAddress(address);
   } catch {
     return false;
   }
-};
+}

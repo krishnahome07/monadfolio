@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Portfolio, Badge, PortfolioSettings } from '../types/portfolio';
 import { fetchPortfolio, fetchUserBadges } from '../utils/monadApi';
 
-export const usePortfolio = (address: string | null) => {
+export const usePortfolio = (address: string | null, _?: any) => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(false);
