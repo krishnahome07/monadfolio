@@ -430,7 +430,7 @@ Built on @monad testnet 🚀
                     <div className="flex items-center justify-center space-x-2">
                       <span>Tx: {mintResult.txHash?.slice(0, 10)}...</span>
                       <button
-                        onClick={() => window.open(`https://explorer.testnet1.monad.xyz/tx/${mintResult.txHash}`, '_blank')}
+                        onClick={() => window.open(`https://testnet.monadexplorer.com/tx/${mintResult.txHash}`, '_blank')}
                         className="text-green-600 hover:text-green-800"
                       >
                         <ExternalLink className="w-4 h-4" />
