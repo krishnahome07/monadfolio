@@ -63,22 +63,6 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
     onConnect(demoAddress);
   };
 
-  const handleManualConnect = async () => {
-    setError(null);
-    
-    if (!manualAddress.trim()) {
-      setError('Please enter a wallet address');
-      return;
-    }
-
-    if (!validateMonadAddress(manualAddress)) {
-      setError('Please enter a valid Monad wallet address');
-      return;
-    }
-
-    onConnect(manualAddress.trim());
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
       {/* Header */}
