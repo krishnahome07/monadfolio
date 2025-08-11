@@ -20,6 +20,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
 
   // Show different UI if in Farcaster but no auto-connection happened
   const showFarcasterNoWallet = isInFarcaster && farcasterUser && !farcasterUser.verifications?.length && !farcasterUser.custodyAddress;
+  
   const handleManualConnect = async () => {
     setError(null);
     setIsValidating(true);
@@ -96,7 +97,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             </div>
             {showFarcasterNoWallet ? (
               <p className="text-sm mt-2 text-orange-600">
-                ⚠️ No wallet address found in your Farcaster profile. Please enter a Monad address manually.
+                💡 No wallet address found in your Farcaster profile. You can still view any Monad portfolio by entering an address below.
               </p>
             ) : (
               <p className="text-sm mt-2 text-purple-600">
@@ -108,14 +109,23 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
 
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
-            Enter Monad Address
+            {isInFarcaster && showFarcasterNoWallet ? 'Enter Any Monad Address to View' : 'Enter Monad Address'}
           </label>
+          {isInFarcaster && showFarcasterNoWallet && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+              <div className="font-medium mb-1">💡 Pro Tip:</div>
+              <p>You can view any Monad wallet's portfolio! Try entering your own wallet address or use the example below to explore the interface.</p>
+            </div>
+          )}
           <input
             type="text"
             value={manualAddress}
             onChange={(e) => setManualAddress(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleManualConnect()}
-            placeholder="0x1234567890abcdef1234567890abcdef12345678"
+            placeholder={isInFarcaster && showFarcasterNoWallet ? 
+              "Enter any Monad address (0x...)" : 
+              "0x1234567890abcdef1234567890abcdef12345678"
+            }
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
           />
           <button
@@ -140,10 +150,19 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             onClick={() => {
               setManualAddress('0x742d35Cc6634C0532925a3b8D4C9db96590c4C87');
             }}
-            className="w-full bg-blue-50 text-blue-700 py-2 rounded-xl font-medium hover:bg-blue-100 transition-colors duration-200 text-sm border border-blue-200"
+            className="w-full bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 py-2 rounded-xl font-medium hover:from-blue-100 hover:to-purple-100 transition-all duration-200 text-sm border border-blue-200"
           >
-            📝 Fill Example Address
+            {isInFarcaster && showFarcasterNoWallet ? '🎯 Try Example Portfolio' : '📝 Fill Example Address'}
           </button>
+          
+          {isInFarcaster && showFarcasterNoWallet && (
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="text-sm text-gray-600">
+                <div className="font-medium text-gray-800 mb-1">Want to connect your own wallet?</div>
+                <p>To auto-connect your wallet in Farcaster, you can verify your Ethereum address in your Farcaster profile settings. This will allow Monadfolio to automatically detect and connect to your wallet.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Error Display */}

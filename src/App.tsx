@@ -33,7 +33,7 @@ function MonadfolioApp() {
           console.log('🔗 Auto-connecting Farcaster custody address:', context.user.custodyAddress);
           setConnectedAddress(context.user.custodyAddress);
         } else {
-          console.log('⚠️ No wallet address found for Farcaster user');
+          console.log('💡 No wallet address found for Farcaster user - showing manual entry');
         }
       }
     }, [isReady, isInFarcaster, context?.user, connectedAddress]);
