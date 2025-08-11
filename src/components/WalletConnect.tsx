@@ -18,8 +18,29 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
+  // Debug: Log the Farcaster user data to understand what's available
+  React.useEffect(() => {
+    if (farcasterUser) {
+      console.log('🔍 Farcaster user data:', {
+        fid: farcasterUser.fid,
+        username: farcasterUser.username,
+        displayName: farcasterUser.displayName,
+        verifications: farcasterUser.verifications,
+        custodyAddress: farcasterUser.custodyAddress,
+        hasVerifications: farcasterUser.verifications?.length > 0,
+        hasCustodyAddress: !!farcasterUser.custodyAddress
+      });
+    }
+  }, [farcasterUser]);
+
+  // Check if we have any wallet addresses available
+  const hasWalletAddresses = farcasterUser && (
+    (farcasterUser.verifications && farcasterUser.verifications.length > 0) ||
+    farcasterUser.custodyAddress
+  );
+  
   // Show different UI if in Farcaster but no auto-connection happened
-  const showFarcasterNoWallet = isInFarcaster && farcasterUser && !farcasterUser.verifications?.length && !farcasterUser.custodyAddress;
+  const showFarcasterNoWallet = isInFarcaster && farcasterUser && !hasWalletAddresses;
   
   const handleManualConnect = async () => {
     setError(null);
@@ -95,26 +116,59 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
                 )}
               </div>
             </div>
-            {showFarcasterNoWallet ? (
+            {!hasWalletAddresses ? (
               <p className="text-sm mt-2 text-orange-600">
                 💡 No wallet address found in your Farcaster profile. You can still view any Monad portfolio by entering an address below.
               </p>
             ) : (
-              <p className="text-sm mt-2 text-purple-600">
-                ✨ Your Farcaster account is connected!
-              </p>
+              <div className="mt-2">
+                <p className="text-sm text-purple-600">
+                  ✨ Your Farcaster account is connected!
+                </p>
+                {farcasterUser.verifications && farcasterUser.verifications.length > 0 && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Found {farcasterUser.verifications.length} verified address(es)
+                  </p>
+                )}
+                {farcasterUser.custodyAddress && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Custody address available
+                  </p>
+                )}
+              </div>
             )}
+          </div>
+        )}
+
+        {/* Debug Info for Development */}
+        {isInFarcaster && farcasterUser && process.env.NODE_ENV === 'development' && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <div className="text-sm font-medium text-yellow-800 mb-2">🔧 Debug Info:</div>
+            <div className="text-xs text-yellow-700 space-y-1">
+              <div>FID: {farcasterUser.fid}</div>
+              <div>Verifications: {farcasterUser.verifications?.length || 0}</div>
+              <div>Custody Address: {farcasterUser.custodyAddress ? 'Yes' : 'No'}</div>
+              {farcasterUser.verifications && farcasterUser.verifications.length > 0 && (
+                <div>First Verification: {farcasterUser.verifications[0]}</div>
+              )}
+            </div>
           </div>
         )}
 
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
-            {isInFarcaster && showFarcasterNoWallet ? 'Enter Any Monad Address to View' : 'Enter Monad Address'}
+            {isInFarcaster && !hasWalletAddresses ? 'Enter Any Monad Address to View' : 'Enter Monad Address'}
           </label>
-          {isInFarcaster && showFarcasterNoWallet && (
+          {isInFarcaster && !hasWalletAddresses && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
               <div className="font-medium mb-1">💡 Pro Tip:</div>
               <p>You can view any Monad wallet's portfolio! Try entering your own wallet address or use the example below to explore the interface.</p>
+            </div>
+          )}
+          {isInFarcaster && hasWalletAddresses && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+              <div className="font-medium mb-1">🔄 Manual Override:</div>
+              <p>Your Farcaster wallet should auto-connect, but you can also manually enter any Monad address to view a different portfolio.</p>
             </div>
           )}
           <input
@@ -122,7 +176,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             value={manualAddress}
             onChange={(e) => setManualAddress(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleManualConnect()}
-            placeholder={isInFarcaster && showFarcasterNoWallet ? 
+            placeholder={isInFarcaster && !hasWalletAddresses ? 
               "Enter any Monad address (0x...)" : 
               "0x1234567890abcdef1234567890abcdef12345678"
             }
@@ -152,10 +206,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
             }}
             className="w-full bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 py-2 rounded-xl font-medium hover:from-blue-100 hover:to-purple-100 transition-all duration-200 text-sm border border-blue-200"
           >
-            {isInFarcaster && showFarcasterNoWallet ? '🎯 Try Example Portfolio' : '📝 Fill Example Address'}
+            {isInFarcaster && !hasWalletAddresses ? '🎯 Try Example Portfolio' : '📝 Fill Example Address'}
           </button>
           
-          {isInFarcaster && showFarcasterNoWallet && (
+          {isInFarcaster && !hasWalletAddresses && (
             <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="text-sm text-gray-600">
                 <div className="font-medium text-gray-800 mb-1">Want to connect your own wallet?</div>
