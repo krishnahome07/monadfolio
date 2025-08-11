@@ -117,8 +117,13 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
               </div>
             </div>
             {!hasWalletAddresses ? (
-              <p className="text-sm mt-2 text-orange-600">
-                💡 No wallet address found in your Farcaster profile. You can still view any Monad portfolio by entering an address below.
+              <div className="mt-2 space-y-2">
+                <p className="text-sm text-orange-600">
+                  💡 No wallet address found in your Farcaster profile.
+                </p>
+                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                  <strong>Quick Fix:</strong> Add your Monad wallet in Farcaster settings for auto-connection next time!
+                </div>
               </p>
             ) : (
               <div className="mt-2">
@@ -212,8 +217,19 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
           {isInFarcaster && !hasWalletAddresses && (
             <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="text-sm text-gray-600">
-                <div className="font-medium text-gray-800 mb-1">Want to connect your own wallet?</div>
-                <p>To auto-connect your wallet in Farcaster, you can verify your Ethereum address in your Farcaster profile settings. This will allow Monadfolio to automatically detect and connect to your wallet.</p>
+                <div className="font-medium text-gray-800 mb-2">🔗 Want to auto-connect your wallet?</div>
+                <div className="space-y-2">
+                  <p><strong>Option 1:</strong> Verify your Monad wallet address in Farcaster settings</p>
+                  <p><strong>Option 2:</strong> Change your custody address to your Monad wallet</p>
+                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                    <div className="font-medium text-blue-800 mb-1">📱 How to do this:</div>
+                    <ul className="text-blue-700 space-y-1">
+                      <li>• Open Farcaster app → Profile → Settings → Wallet</li>
+                      <li>• Or go to warpcast.com → Settings → Connected Accounts</li>
+                      <li>• Add/verify your Monad wallet address</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           )}
