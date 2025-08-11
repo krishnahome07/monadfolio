@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monadfolio - Your Monad Portfolio & Identity</title>
+    <meta name="description" content="Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated with Monad news.">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://farcaster.xyz https://client.farcaster.xyz https://warpcast.com https://client.warpcast.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:;
+      font-src 'self' data: https:;
+      connect-src 'self' 
+        https://farcaster.xyz 
+        https://client.farcaster.xyz 
+        https://warpcast.com 
+        https://client.warpcast.com 
+        https://wrpcd.net 
+        https://*.wrpcd.net 
+        https://privy.farcaster.xyz 
+        https://privy.warpcast.com 
+        https://auth.privy.io 
+        https://*.rpc.privy.systems 
+        https://*.supabase.co
+        https://*.supabase.com
+        https://testnet1.monad.xyz
+        https://*.monad.xyz;
+      frame-src 'self' https://farcaster.xyz https://warpcast.com;
+      worker-src 'self' blob:;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'self' https://farcaster.xyz https://warpcast.com;
+    ">
+    
+    <!-- Farcaster Mini App Configuration -->
+    <meta name="fc:miniapp" content='{"version":"next","imageUrl":"https://monadfolio.vercel.app/bgimage.jpg","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_miniapp","name":"Monadfolio","url":"https://monadfolio.vercel.app","splashImageUrl":"https://monadfolio.vercel.app/appicon.png","splashBackgroundColor":"#E0F2FE"}}}' />
+    
+    <!-- Backward compatibility for older Farcaster clients -->
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://monadfolio.vercel.app/bgimage.jpg","button":{"title":"Open Monadfolio 💼","action":{"type":"launch_frame","name":"Monadfolio","url":"https://monadfolio.vercel.app","splashImageUrl":"https://monadfolio.vercel.app/appicon.png","splashBackgroundColor":"#E0F2FE"}}}' />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Monadfolio - Your Monad Portfolio and Identity" />
+    <meta property="og:description" content="Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated." />
+    <meta property="og:image" content="https://monadfolio.vercel.app/bgimage.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://monadfolio.vercel.app" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Monadfolio - Your Monad Portfolio & Identity" />
+    <meta name="twitter:description" content="Transform your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio, earn badges, and stay updated." />
+    <meta name="twitter:image" content="https://monadfolio.vercel.app/bgimage.jpg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
