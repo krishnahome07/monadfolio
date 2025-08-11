@@ -8,46 +8,51 @@ A beautiful, production-ready Farcaster mini-app that transforms your Monad wall
 
 Monadfolio is a comprehensive Farcaster mini-app designed to be your daily companion for managing and showcasing your Monad on-chain identity. It combines beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
 
+**Current Status**: The app is fully functional as a portfolio viewer and badge system. Portfolio data and news feeds are currently in development mode (no live blockchain data yet).
+
 ## ✨ Core Features
 
-### 📊 Portfolio
+### 📊 Portfolio Visualization
 - **Visual Portfolio**: Stunning colored block visualization where each block's size represents your asset allocation
-- **Real-time Data**: Live connection to Monad blockchain for up-to-date portfolio information
-- **Customization**: Multiple pre-defined color palettes for personalized visualization
+- **Multiple Color Palettes**: Choose from 5 beautiful pre-defined color schemes (Purple Haze, Ocean Blue, Forest Green, Sunset Orange, Rose Pink)
 - **Privacy Controls**: Hide specific assets and toggle total portfolio value display
-- **NFT Showcase**: Beautiful gallery display of your Monad NFT collection
+- **Asset Management**: Show/hide individual tokens from your portfolio view
+- **Responsive Design**: Beautiful visualization that works on all screen sizes
 - **Social Sharing**: Cast your portfolio directly to Farcaster with one click
 
 ### 🏆 Achievement Badges System
 
-#### NFT-Based Badges
-- **🏆 Monad Pioneer**: Hold NFTs from earliest official Monad collections
-- **🎨 Collector**: Own NFTs from 3+ distinct Monad collections
-- **✨ Artisan**: Mint your own NFT on the Monad network
+#### Available Badge Categories
+- **🏆 Portfolio Badges**: Based on token holdings and portfolio value
+  - Monad Holder: Hold MON tokens in wallet
+  - Monad Collector: Hold multiple Monad ecosystem tokens
+  - Monad Whale: Portfolio value exceeding significant thresholds
+  - Monad Pioneer: Early adopter recognition
 
-#### Portfolio-Based Badges
-- **🐋 Monad Whale**: Portfolio value exceeding significant thresholds
-- **💎 Diamond Hands**: Long-term holding demonstrating conviction
-- **📊 Diversifier**: Balanced portfolio across different asset categories
-- **🚀 Growth Master**: Achieve significant portfolio growth
+- **⚡ Usage Badges**: Based on on-chain activity
+  - Monad Active: Complete 10+ transactions on Monad
+  - Monad DeFi User: Active in Monad DeFi ecosystem
+  - Monad Social: Connected wallet via Farcaster (currently achievable)
 
-#### Chain Usage Badges
-- **⚡ Active Trader**: Complete significant number of Monad transactions
-- **🔥 DeFi Explorer**: Interact with multiple Monad-native DeFi protocols
-- **🛡️ Network Supporter**: Delegate tokens to Monad validators
+#### Badge Features
+- **Rarity System**: Common, Rare, and Legendary badges with distinct visual styling
+- **Progress Tracking**: Visual progress bar showing badge completion percentage
+- **Category Filtering**: Filter badges by NFT, Portfolio, or Usage categories
+- **Social Sharing**: Share earned achievements to your Farcaster network
 
 ### 📰 Monad News Hub
-- **📢 Official Updates**: Latest announcements from Monad team
-- **🌐 Ecosystem News**: Updates from Monad ecosystem projects and partners
-- **📰 Industry Coverage**: Relevant blockchain and crypto news
-- **Real-time Updates**: Stay informed without leaving Farcaster
-- **Smart Filtering**: Organized by official, ecosystem, and industry categories
+- **Organized Categories**: Official updates, ecosystem news, and industry coverage
+- **Smart Filtering**: Filter news by category (Official, Ecosystem, General)
+- **Real-time Updates**: Auto-refresh functionality (currently in development)
+- **External Links**: Direct access to full articles and announcements
+- **Clean Interface**: Easy-to-read news feed with publication timestamps
 
 ### 🎮 Social Features
-- **🏆 Badge Sharing**: Cast your earned achievements to showcase your progress
-- **📊 Portfolio Sharing**: Share beautiful portfolio snapshots with custom styling
-- **🤝 Community Features**: Connect with other Monad ecosystem participants
-- **💬 Native Integration**: Seamless Farcaster composer and social features
+- **🔗 Farcaster Integration**: Native miniapp experience within Farcaster
+- **📱 Standalone Web App**: Full functionality outside of Farcaster
+- **🤝 Wallet Connection**: Support for manual address entry and demo mode
+- **💬 Social Sharing**: Native Farcaster composer integration for sharing portfolios and badges
+- **👤 User Profiles**: Display Farcaster user information when connected
 
 ## 🚀 Live Demo
 
@@ -58,66 +63,70 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 
 ### Frontend
 - **React 18** - Modern React with hooks and functional components
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
+- **TypeScript** - Type-safe development with comprehensive type definitions
+- **Tailwind CSS** - Utility-first CSS framework for responsive design
 - **Vite** - Fast build tool and development server
 - **Lucide React** - Beautiful, customizable icons
 
-### Blockchain Integration
-- **Ethers.js** - Ethereum and Monad blockchain interaction
-- **Monad Network** - Native integration with Monad blockchain
-- **Wallet Integration** - Secure, non-custodial wallet connectivity
+### State Management
+- **React Query (@tanstack/react-query)** - Efficient data fetching and caching
+- **Custom Hooks** - Modular state management with `usePortfolio`, `useFarcasterSDK`, `useMonadNews`
+- **Local Storage** - Persistent user settings and preferences
 
 ### Farcaster Integration
-- **Farcaster Miniapp SDK** - Native Farcaster miniapp support
+- **@farcaster/miniapp-sdk** - Native Farcaster miniapp support
 - **Frame Compatibility** - Backward compatibility with Farcaster frames
 - **Social Sharing** - Native Farcaster composer integration
 
-### Backend & Database
-- **Supabase** - PostgreSQL database with real-time features
+### Backend & Database (Optional)
+- **Supabase** - PostgreSQL database with real-time features (configured but not actively used)
 - **Row Level Security (RLS)** - Secure data access patterns
-- **React Query** - Efficient data fetching and caching
+- **Migration System** - Database schema versioning
 
 ### Development Tools
-- **ESLint** - Code linting and formatting
-- **TypeScript ESLint** - TypeScript-specific linting rules
+- **ESLint** - Code linting with TypeScript support
 - **PostCSS** - CSS processing with Autoprefixer
+- **Vercel** - Deployment and hosting platform
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/           # React components
-│   ├── WalletConnect.tsx    # Wallet connection interface
-│   ├── PortfolioSnapshot.tsx # Main portfolio visualization
-│   ├── BadgeCollection.tsx  # Achievement badges display
-│   ├── MonadNews.tsx        # News feed component
-│   └── MaintenanceMode.tsx  # Maintenance screen
-├── hooks/               # Custom React hooks
-│   ├── useFarcasterSDK.ts   # Farcaster integration
-│   ├── usePortfolio.ts      # Portfolio data management
-│   └── useMonadNews.ts      # News data management
-├── utils/               # Utility functions
-│   └── monadApi.ts          # Monad blockchain API integration
-├── types/               # TypeScript type definitions
-│   └── portfolio.ts         # Portfolio and badge types
-└── App.tsx              # Main application component
+├── components/              # React components
+│   ├── WalletConnect.tsx       # Wallet connection interface
+│   ├── PortfolioSnapshot.tsx   # Main portfolio visualization
+│   ├── BadgeCollection.tsx     # Achievement badges display
+│   ├── MonadNews.tsx           # News feed component
+│   └── MaintenanceMode.tsx     # Maintenance screen
+├── hooks/                   # Custom React hooks
+│   ├── useFarcasterSDK.ts      # Farcaster integration logic
+│   ├── usePortfolio.ts         # Portfolio data management
+│   └── useMonadNews.ts         # News data management
+├── utils/                   # Utility functions
+│   └── monadApi.ts             # Blockchain API integration (mock data)
+├── types/                   # TypeScript type definitions
+│   └── portfolio.ts            # Portfolio, badge, and news types
+├── lib/                     # External service integrations
+│   └── supabase.ts             # Database client configuration
+└── App.tsx                  # Main application component
 ```
 
 ## 🎮 How to Use
 
 ### For Users
-1. **🔗 Connect**: Link your Monad wallet through Farcaster or manual entry
+1. **🔗 Connect**: 
+   - **In Farcaster**: Automatic connection with your verified wallet addresses
+   - **Web App**: Manual wallet address entry or use demo mode
 2. **👀 Visualize**: View your portfolio as stunning colored block charts
-3. **🎨 Customize**: Choose from multiple color palettes and privacy settings
-4. **🏆 Achieve**: Earn badges based on your on-chain activity and holdings
+3. **🎨 Customize**: Choose from 5 color palettes and manage asset visibility
+4. **🏆 Achieve**: Earn badges based on your wallet activity (Farcaster connection badge currently available)
 5. **📢 Share**: Cast your portfolio and achievements to your Farcaster network
-6. **📰 Stay Informed**: Browse curated Monad ecosystem news and updates
+6. **📰 Stay Informed**: Browse the news section (content in development)
 
 ### For Developers
 1. **📥 Clone** the repository
 2. **📦 Install** dependencies with `npm install`
-3. **⚙️ Configure** environment variables
+3. **⚙️ Configure** environment variables (optional)
 4. **🚀 Run** development server with `npm run dev`
 5. **🏗️ Build** for production with `npm run build`
 
@@ -126,7 +135,6 @@ src/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn package manager
-- Monad wallet (for testing)
 
 ### Local Development
 
@@ -141,25 +149,19 @@ cd monadfolio
 npm install
 ```
 
-3. **Environment Setup**
+3. **Environment Setup (Optional)**
 ```bash
 cp .env.example .env
 ```
 
-4. **Configure Environment Variables**
+4. **Configure Environment Variables (Optional)**
 ```env
-# Supabase Configuration
+# Supabase Configuration (Optional - for future user stats)
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # App Configuration
 VITE_APP_ENABLED=true
-
-# NFT Contract Configuration
-VITE_NFT_CONTRACT_ADDRESS=your_deployed_contract_address_here
-
-# Deployment Configuration (for contract deployment)
-PRIVATE_KEY=your_wallet_private_key_for_deployment
 ```
 
 5. **Start Development Server**
@@ -177,19 +179,17 @@ npm run build
 npm run preview
 ```
 
-## 🗄️ Database Schema
+## 🗄️ Database Schema (Optional)
 
-The application uses Supabase for optional user statistics and cross-device sync:
+The application includes optional Supabase integration for future user statistics:
 
-### Optional User Statistics
 ```sql
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   username text UNIQUE NOT NULL,
-  wallet_address text,
-  total_portfolio_value numeric DEFAULT 0,
-  badges_earned integer DEFAULT 0,
-  last_activity timestamptz DEFAULT now(),
+  total_puzzles_solved integer DEFAULT 0,
+  best_time integer DEFAULT 0,
+  average_moves integer DEFAULT 0,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -197,20 +197,22 @@ CREATE TABLE users (
 
 ## 🔐 Security Features
 
-### Wallet Security
-- **Non-custodial**: Never stores private keys or sensitive data
-- **Secure Connection**: Uses established Farcaster wallet infrastructure
-- **Privacy Controls**: Users control what data is shared publicly
-
-### Data Protection
-- **Input Sanitization**: All user inputs are validated and sanitized
-- **SQL Injection Prevention**: Parameterized queries and RLS policies
+### Application Security
 - **Content Security Policy**: Strict CSP headers preventing XSS attacks
+- **Input Sanitization**: All user inputs are validated and sanitized
+- **Environment Validation**: Proper validation of configuration variables
+- **Error Boundaries**: Graceful error handling throughout the application
 
-### Farcaster Integration
+### Farcaster Integration Security
 - **Secure SDK**: Uses official Farcaster miniapp SDK
-- **Frame Compatibility**: Backward compatible with existing Farcaster frames
+- **Context Validation**: Proper validation of Farcaster user context
 - **Privacy Respect**: Only accesses necessary user data
+- **Timeout Handling**: Prevents infinite loading states
+
+### Wallet Security
+- **Non-custodial**: Never stores private keys or sensitive wallet data
+- **Address Validation**: Validates Ethereum address format
+- **Privacy Controls**: Users control what portfolio data is shared
 
 ## 🌐 Deployment
 
@@ -218,28 +220,34 @@ CREATE TABLE users (
 The app is deployed on Vercel with:
 - Automatic builds from Git
 - Environment variable management
-- Custom headers for security
+- Custom security headers
 - SPA routing support
+- Farcaster frame configuration
 
-### Netlify (Alternative)
-Alternative deployment option with:
-- Optimized build settings
-- Security headers
-- Rewrite rules for SPA
+### Configuration Files
+- `vercel.json`: Deployment configuration with security headers
+- `public/.well-known/farcaster.json`: Farcaster frame metadata
 
-## 🎯 Monad Integration
+## 🎯 Current Implementation Status
 
-### Blockchain Features
-- **Real-time Data**: Direct connection to Monad RPC endpoints
-- **Low Latency**: Leverages Monad's high-speed transaction capabilities
-- **Cost Effective**: Benefits from Monad's low transaction costs
-- **Full Compatibility**: Native support for Monad ecosystem
+### ✅ Fully Implemented
+- **Portfolio Visualization**: Complete with color palettes and asset management
+- **Badge System**: Full badge collection with progress tracking
+- **Farcaster Integration**: Native miniapp support with social sharing
+- **Responsive Design**: Works perfectly on all devices
+- **Settings Management**: Persistent user preferences
+- **Error Handling**: Comprehensive error boundaries and fallbacks
 
-### Portfolio Analysis
-- **Asset Detection**: Automatically discovers all Monad assets
-- **NFT Recognition**: Identifies and displays Monad NFTs
-- **DeFi Integration**: Tracks interactions with Monad DeFi protocols
-- **Staking Tracking**: Monitors staking and delegation activities
+### 🚧 In Development
+- **Live Blockchain Data**: Currently using mock data, ready for Monad integration
+- **News Feed**: Framework ready, awaiting news source integration
+- **Real-time Updates**: Portfolio refresh functionality implemented
+
+### 🔮 Future Enhancements
+- **Historical Data**: Portfolio performance tracking over time
+- **Advanced Analytics**: Detailed portfolio insights and recommendations
+- **Social Features**: Community leaderboards and competitions
+- **Mobile App**: Progressive Web App features
 
 ## 🤝 Contributing
 
@@ -256,6 +264,7 @@ We welcome contributions! Please follow these guidelines:
 - Write clean, documented code
 - Use semantic commit messages
 - Update documentation for API changes
+- Test both Farcaster and standalone modes
 
 ## 📝 License
 
@@ -278,20 +287,31 @@ For support, feature requests, or bug reports:
 
 ## 🔮 Roadmap
 
-### Upcoming Features
-- [ ] 📈 Advanced portfolio analytics and performance tracking
-- [ ] 🏆 Social leaderboards and community competitions
-- [ ] 🎨 Custom badge creation for Monad projects
-- [ ] 📊 Historical portfolio performance charts
-- [ ] 🔗 Integration with more Monad DeFi protocols
-- [ ] 📱 Enhanced mobile experience and PWA features
-- [ ] 🤖 AI-powered portfolio insights and recommendations
+### Phase 1: Core Infrastructure ✅
+- [x] Portfolio visualization system
+- [x] Badge collection and progress tracking
+- [x] Farcaster miniapp integration
+- [x] Responsive design implementation
+- [x] Social sharing functionality
 
-### Performance Improvements
-- [ ] 🔄 Service worker for offline functionality
-- [ ] 📱 Progressive Web App features
-- [ ] ⚡ Advanced caching strategies
-- [ ] 📦 Bundle size optimization
+### Phase 2: Data Integration 🚧
+- [ ] Live Monad blockchain data integration
+- [ ] Real-time portfolio updates
+- [ ] News feed with live sources
+- [ ] Historical portfolio tracking
+
+### Phase 3: Advanced Features 🔮
+- [ ] Advanced portfolio analytics
+- [ ] Social leaderboards and competitions
+- [ ] Custom badge creation for projects
+- [ ] AI-powered portfolio insights
+- [ ] Cross-chain portfolio support
+
+### Phase 4: Mobile & Performance 🔮
+- [ ] Progressive Web App features
+- [ ] Offline functionality
+- [ ] Advanced caching strategies
+- [ ] Mobile-first optimizations
 
 ---
 
@@ -304,7 +324,7 @@ For support, feature requests, or bug reports:
 ## 📚 Additional Documentation
 
 For detailed technical information:
-- [App Flow Documentation](./docs/APP_FLOW.md) - Detailed technical architecture
-- [Component Documentation](./src/components/) - Individual component details
-- [API Integration](./src/utils/monadApi.ts) - Blockchain integration details
-- [Farcaster Integration](./src/hooks/useFarcasterSDK.ts) - Social features implementation
+- [App Flow Documentation](./docs/APP_FLOW.md) - Detailed technical architecture and initialization flow
+- [Component Documentation](./src/components/) - Individual component details and props
+- [API Integration](./src/utils/monadApi.ts) - Current mock API implementation
+- [Farcaster Integration](./src/hooks/useFarcasterSDK.ts) - Social features implementation details
