@@ -16,79 +16,22 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
   
   const userStats = await fetchUserStats(address);
   
-  // Sample portfolio data for demonstration
-  const sampleAssets: Asset[] = [
-    {
-      symbol: 'MON',
-      name: 'Monad',
-      balance: 1250.5,
-      value: 3126.25,
-      price: 2.50,
-      change24h: 12.5,
-      transactionCount: 15
-    },
-    {
-      symbol: 'USDC',
-      name: 'USD Coin',
-      balance: 850.0,
-      value: 850.0,
-      price: 1.00,
-      change24h: 0.1,
-      transactionCount: 8
-    },
-    {
-      symbol: 'WETH',
-      name: 'Wrapped Ethereum',
-      balance: 0.75,
-      value: 2400.0,
-      price: 3200.0,
-      change24h: -2.3,
-      transactionCount: 5
-    },
-    {
-      symbol: 'MSTAKE',
-      name: 'Monad Staking Token',
-      balance: 500.0,
-      value: 1250.0,
-      price: 2.50,
-      change24h: 8.7,
-      transactionCount: 3
-    }
-  ];
-
-  const sampleNFTs: NFT[] = [
-    {
-      id: '1',
-      name: 'Monad Genesis #1234',
-      collection: 'Monad Genesis',
-      imageUrl: 'https://images.pexels.com/photos/7567443/pexels-photo-7567443.jpeg?auto=compress&cs=tinysrgb&w=400',
-      floorPrice: 0.5
-    },
-    {
-      id: '2',
-      name: 'Monad Builders #567',
-      collection: 'Monad Builders',
-      imageUrl: 'https://images.pexels.com/photos/8566473/pexels-photo-8566473.jpeg?auto=compress&cs=tinysrgb&w=400',
-      floorPrice: 0.25
-    }
-  ];
-
-  const totalValue = sampleAssets.reduce((sum, asset) => sum + asset.value, 0);
-  const totalTransactions = sampleAssets.reduce((sum, asset) => sum + (asset.transactionCount || 0), 0);
+  // Return empty portfolio - ready for real blockchain data integration
+  const assets: Asset[] = [];
+  const nfts: NFT[] = [];
 
   return {
-    totalValue,
-    assets: sampleAssets,
-    nfts: sampleNFTs,
+    totalValue: 0,
+    assets,
+    nfts,
     lastUpdated: new Date(),
     userStats: {
       ...userStats,
-      monadBalance: sampleAssets.find(a => a.symbol === 'MON')?.balance || 0,
-      totalTransactions,
-      isActiveWallet: totalTransactions > 0,
-      firstTransactionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-      stakingAmount: sampleAssets.find(a => a.symbol === 'MSTAKE')?.balance || 0,
-      activeProtocols: ['MonadSwap', 'MonadStake', 'MonadLend']
+      monadBalance: 0,
+      totalTransactions: 0,
+      isActiveWallet: false,
+      stakingAmount: 0,
+      activeProtocols: []
     }
   };
 };
