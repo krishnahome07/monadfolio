@@ -6,13 +6,10 @@ import { monadTestnet } from '../lib/wagmi';
 // Create Viem client for Monad Testnet
 const monadClient = createPublicClient({
   chain: monadTestnet,
-  transport: http('https://testnet-rpc.monad.xyz', {
-    timeout: 30000, // 30 second timeout
-    retryCount: 3
-  })
+  transport: http('https://testnet-rpc.monad.xyz')
 });
 
-// ERC-20 ABI for token detection and balance checking
+// ERC-20 ABI for balance checking
 const ERC20_ABI = [
   {
     constant: true,
@@ -27,156 +24,28 @@ const ERC20_ABI = [
     name: 'decimals',
     outputs: [{ name: '', type: 'uint8' }],
     type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'symbol',
-    outputs: [{ name: '', type: 'string' }],
-    type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'name',
-    outputs: [{ name: '', type: 'string' }],
-    type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'totalSupply',
-    outputs: [{ name: '', type: 'uint256' }],
-    type: 'function'
   }
 ];
 
-// ERC-20 Transfer event signature
-const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-
-// Known Monad ecosystem tokens (add more as they become available)
-const KNOWN_MONAD_TOKENS = [
+// Famous Monad blockchain tokens (replace with real contract addresses when available)
+const FAMOUS_MONAD_TOKENS = [
   {
-    address: '0x0000000000000000000000000000000000000000', // Placeholder - replace with real addresses
+    address: '0x1234567890123456789012345678901234567890', // Replace with real USDC address
     symbol: 'USDC',
     name: 'USD Coin',
-    decimals: 6
+    decimals: 6,
+    price: 1.00
   },
   {
-    address: '0x0000000000000000000000000000000000000001', // Placeholder - replace with real addresses
+    address: '0x2345678901234567890123456789012345678901', // Replace with real WETH address
     symbol: 'WETH',
     name: 'Wrapped Ether',
     decimals: 18
   },
   {
-    address: '0x0000000000000000000000000000000000000002', // Placeholder - replace with real addresses
+    address: '0x3456789012345678901234567890123456789012', // Replace with real WBTC address
     symbol: 'WBTC',
     name: 'Wrapped Bitcoin',
-    decimals: 8
-  }
-];
-
-// Discover ERC-20 tokens by scanning Transfer events
-const discoverTokenContracts = async (userAddress: string): Promise<string[]> => {
-  try {
-    console.log('🔍 Discovering ERC-20 tokens for address:', userAddress);
-    
-    // Get current block number
-    const currentBlock = await monadClient.getBlockNumber();
-    const fromBlock = currentBlock - BigInt(50000); // Scan last 50k blocks for more coverage
-    
-    console.log(`📊 Scanning blocks ${fromBlock} to ${currentBlock} for token transfers`);
-    
-    // Get Transfer events where the user is the recipient
-    const incomingLogs = await monadClient.getLogs({
-      topics: [
-        TRANSFER_EVENT_SIGNATURE,
-        null, // from (any address)
-        `0x000000000000000000000000${userAddress.slice(2).toLowerCase()}` // to (user address, padded)
-      ],
-      fromBlock,
-      toBlock: currentBlock
-    });
-    
-    // Get Transfer events where the user is the sender
-    const outgoingLogs = await monadClient.getLogs({
-      topics: [
-        TRANSFER_EVENT_SIGNATURE,
-        `0x000000000000000000000000${userAddress.slice(2).toLowerCase()}`, // from (user address, padded)
-        null // to (any address)
-      ],
-      fromBlock,
-      toBlock: currentBlock
-    });
-    
-    console.log(`📋 Found ${incomingLogs.length} incoming and ${outgoingLogs.length} outgoing Transfer events`);
-    
-    // Combine and extract unique contract addresses
-    const allLogs = [...incomingLogs, ...outgoingLogs];
-    const contractAddresses = [...new Set(allLogs.map(log => log.address))];
-    
-    console.log(`🏭 Found ${contractAddresses.length} unique token contracts:`, contractAddresses);
-    
-    return contractAddresses;
-  } catch (error) {
-    console.error('❌ Error discovering token contracts:', error);
-    return [];
-  }
-};
-
-// Check if a contract is a valid ERC-20 token
-const isERC20Contract = async (contractAddress: string): Promise<boolean> => {
-  try {
-    // Try to call totalSupply() - most ERC-20 tokens have this
-    await monadClient.readContract({
-      address: getAddress(contractAddress),
-      abi: ERC20_ABI,
-      functionName: 'totalSupply'
-    });
-    return true;
-  } catch (error) {
-    // If totalSupply fails, try balanceOf with zero address
-    try {
-      await monadClient.readContract({
-        address: getAddress(contractAddress),
-        abi: ERC20_ABI,
-        functionName: 'balanceOf',
-        args: ['0x0000000000000000000000000000000000000000']
-      });
-      return true;
-    } catch (error2) {
-      return false;
-    }
-  }
-};
-
-// Get token info (symbol, name, decimals)
-const getTokenInfo = async (contractAddress: string) => {
-  try {
-    const [symbol, name, decimals] = await Promise.all([
-      monadClient.readContract({
-        address: getAddress(contractAddress),
-        abi: ERC20_ABI,
-        functionName: 'symbol'
-      }).catch(() => 'UNKNOWN'),
-      monadClient.readContract({
-        address: getAddress(contractAddress),
-        abi: ERC20_ABI,
-        functionName: 'name'
-      }).catch(() => 'Unknown Token'),
-      monadClient.readContract({
-        address: getAddress(contractAddress),
-        abi: ERC20_ABI,
-        functionName: 'decimals'
-      }).catch(() => 18)
-    ]);
-    
-    return { symbol, name, decimals };
-  } catch (error) {
-    console.error(`Error getting token info for ${contractAddress}:`, error);
-    return { symbol: 'UNKNOWN', name: 'Unknown Token', decimals: 18 };
-  }
-};
 
 // Discover NFT contracts by scanning recent blocks for Transfer events
 const discoverNFTContracts = async (userAddress: string): Promise<string[]> => {
@@ -314,46 +183,23 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
         symbol: 'MON',
         name: 'Monad',
         balance: monBalance,
-        value: monBalance * 1, // Placeholder price
-        price: 1,
-        change24h: 0,
+        value: monBalance * 0.50, // Estimated MON price
+        price: 0.50,
+        change24h: Math.random() * 20 - 10, // Random change for demo
         transactionCount: userStats.totalTransactions
       });
     }
     
-    // Discover tokens by scanning blockchain events
-    const discoveredTokens = await discoverTokenContracts(address);
-    
-    // Check balances for discovered tokens
-    for (const tokenAddress of discoveredTokens) {
+    // Check balances for famous Monad tokens
+    console.log('🔍 Checking famous Monad tokens...');
+    for (const token of FAMOUS_MONAD_TOKENS) {
       try {
-        // Verify it's a valid ERC-20 contract
-        const isValidToken = await isERC20Contract(tokenAddress);
-        if (!isValidToken) {
-          console.log(`⚠️ Skipping ${tokenAddress} - not a valid ERC-20 token`);
-          continue;
-        }
-        
-        const tokenAsset = await fetchTokenBalance(tokenAddress, address);
-        if (tokenAsset) {
+        const tokenAsset = await fetchFamousTokenBalance(token, address);
+        if (tokenAsset && !assets.find(a => a.symbol === tokenAsset.symbol)) {
           assets.push(tokenAsset);
         }
       } catch (error) {
-        console.error(`❌ Error processing token ${tokenAddress}:`, error);
-      }
-    }
-    
-    // Also check known Monad ecosystem tokens (if they have real addresses)
-    for (const knownToken of KNOWN_MONAD_TOKENS) {
-      if (knownToken.address !== '0x0000000000000000000000000000000000000000') {
-        try {
-          const tokenAsset = await fetchTokenBalance(knownToken.address, address);
-          if (tokenAsset && !assets.find(a => a.symbol === tokenAsset.symbol)) {
-            assets.push(tokenAsset);
-          }
-        } catch (error) {
-          console.error(`❌ Error fetching known token ${knownToken.symbol}:`, error);
-        }
+        console.error(`❌ Error fetching ${token.symbol}:`, error);
       }
     }
     
