@@ -149,7 +149,7 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
         {/* Total Value */}
         <div className="mt-4 flex items-center justify-between">
           <div>
-            <div className="text-3xl font-bold">
+            <div className="text-2xl md:text-3xl font-bold">
               {visibleAssets.length} Monad tokens • {portfolio.nfts.length} NFTs • {portfolio.userStats?.totalTransactions || 0} Monad transactions
             </div>
           </div>
@@ -251,8 +251,8 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
                   }}
                   title={`${asset.name}: $${asset.value.toLocaleString()} (${size.toFixed(1)}%)`}
                 >
-                  <div className="text-base md:text-lg font-bold text-center">{asset.symbol}</div>
-                  <div className="text-xs md:text-sm opacity-90 text-center">${asset.value.toLocaleString()}</div>
+                  <div className="text-lg md:text-xl font-bold text-center">{asset.symbol}</div>
+                  <div className="text-sm md:text-base opacity-90 text-center">${asset.value.toLocaleString()}</div>
                   <div className={`text-xs ${asset.change24h >= 0 ? 'text-green-200' : 'text-red-200'} text-center`}>
                     {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(1)}%
                   </div>
@@ -266,8 +266,8 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
               <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Wallet className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Assets Found</h3>
-              <p className="text-gray-500">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Assets Found</h3>
+              <p className="text-base text-gray-500">
                 This wallet doesn't have any Monad tokens yet.
               </p>
             </div>
@@ -278,7 +278,7 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
       {/* NFT Showcase */}
       {portfolio.nfts && portfolio.nfts.length > 0 && (
         <div className="border-t border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">NFT Collection</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">NFT Collection</h3>
           <div className="grid grid-cols-4 gap-4">
             {portfolio.nfts.slice(0, 4).map((nft) => (
               <div key={nft.id} className="relative group">
@@ -288,10 +288,10 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
                   className="w-full h-20 object-cover rounded-lg"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
-                  <div className="text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="font-semibold">{nft.name}</div>
+                  <div className="text-white text-sm text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="font-semibold text-sm">{nft.name}</div>
                     {nft.floorPrice && (
-                      <div>{nft.floorPrice} ETH</div>
+                      <div className="text-xs">{nft.floorPrice} ETH</div>
                     )}
                   </div>
                 </div>
