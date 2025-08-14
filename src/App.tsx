@@ -56,6 +56,7 @@ function MonadfolioApp() {
           verifications: context.user.verifications,
           custodyAddress: context.user.custodyAddress
         });
+        }
       }
     }, [isReady, isInFarcaster, context?.user, connectedAddress]);
     const { 
