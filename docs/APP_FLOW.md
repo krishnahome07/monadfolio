@@ -1,6 +1,6 @@
 # 🔄 Monadfolio - App Flow Overview
 
-This document provides a comprehensive overview of how the Monadfolio application initializes, loads, and operates. It's designed for developers who need to understand the application architecture and flow.
+This document provides a comprehensive overview of how the Monadfolio application initializes, loads, and operates. The app focuses on displaying famous Monad ecosystem tokens with a clean, simplified architecture.
 
 ## 📋 Table of Contents
 
@@ -26,7 +26,7 @@ This document provides a comprehensive overview of how the Monadfolio applicatio
 index.html → src/main.tsx → src/App.tsx → MonadfolioApp()
 ```
 
-The application follows a standard React initialization pattern with Farcaster miniapp integration and Wagmi wallet connectivity for portfolio visualization and social features.
+The application follows a standard React initialization pattern with Farcaster miniapp integration and Wagmi wallet connectivity for famous Monad token portfolio visualization and social features.
 
 ### **Entry Point Details:**
 1. **`index.html`** loads with Farcaster miniapp metadata and CSP headers
@@ -207,7 +207,7 @@ return (
 - Validates addresses using `validateMonadAddress()`
 
 ### **2. `src/components/PortfolioSnapshot.tsx`**
-**Purpose**: Main portfolio visualization with colored blocks
+**Purpose**: Main portfolio visualization with colored blocks for famous Monad tokens
 **Props**:
 - `portfolio: Portfolio` - Portfolio data
 - `settings: PortfolioSettings` - Display settings
@@ -219,7 +219,7 @@ return (
 
 **Features**:
 - 5 color palette options
-- Asset visibility controls
+- Token visibility controls for famous tokens (USDC, WETH, WBTC, DAI, UNI, LINK, MON)
 - Social sharing integration
 - Settings panel with real-time updates
 
@@ -230,7 +230,7 @@ return (
 - `onShareBadges?: () => void` - Badge sharing
 
 **Features**:
-- Category filtering (all, nft, portfolio, usage)
+- Category filtering (all, portfolio, usage)
 - Progress tracking with visual progress bar
 - Rarity-based styling (common, rare, legendary)
 - Earned vs unearned badge distinction
@@ -562,9 +562,9 @@ const loadPortfolio = async () => {
 
 ### **Data Sources:**
 ```typescript
-// Current Implementation (Mock Data)
+// Current Implementation (Famous Tokens)
 src/utils/monadApi.ts:
-- fetchPortfolio() → Returns empty portfolio
+- fetchPortfolio() → Returns portfolio with famous Monad tokens (USDC, WETH, WBTC, DAI, UNI, LINK, MON)
 - fetchUserBadges() → Returns badge definitions (only Farcaster badge earned)
 - fetchMonadNews() → Returns empty news array
 - validateMonadAddress() → Validates Ethereum address format
@@ -572,7 +572,7 @@ src/utils/monadApi.ts:
 
 ### **Data Flow Diagram:**
 ```
-User Action → Hook Updates → Component Re-render → API Call (Mock) → State Update
+User Action → Hook Updates → Component Re-render → Token Balance Check → State Update
      ↓
 Local Storage ← Settings Persistence
      ↓
@@ -615,16 +615,22 @@ useEffect(() => {
 ### **Key Files for Debugging:**
 - **App initialization**: `src/hooks/useFarcasterSDK.ts`
 - **Wallet connection**: `src/hooks/useWalletConnection.ts`
-- **Portfolio loading**: `src/utils/monadApi.ts` (currently mock data)
+- **Portfolio loading**: `src/utils/monadApi.ts` (famous tokens implementation)
 - **Wagmi configuration**: `src/lib/wagmi.ts`
 - **State management**: `src/hooks/usePortfolio.ts`
 - **Settings persistence**: localStorage operations in `usePortfolio.ts`
 
 ### **Common Development Scenarios:**
 
+#### **Adding New Famous Tokens:**
+1. Update types in `src/types/portfolio.ts`
+2. Add token to `FAMOUS_MONAD_TOKENS` array in `src/utils/monadApi.ts`
+3. Update contract address when available
+4. Test token balance detection
+
 #### **Adding New Portfolio Features:**
 1. Update types in `src/types/portfolio.ts`
-2. Modify `fetchPortfolio()` in `src/utils/monadApi.ts`
+2. Modify `fetchPortfolio()` or `fetchFamousTokenBalance()` in `src/utils/monadApi.ts`
 3. Update `usePortfolio.ts` hook
 4. Modify `PortfolioSnapshot.tsx` component
 
@@ -646,19 +652,21 @@ useEffect(() => {
 3. Test with real Supabase instance
 4. Add error handling for database operations
 
-#### **Live Data Integration:**
-1. Replace mock functions in `monadApi.ts`
-2. Add real Monad RPC endpoints
+#### **Live Token Integration:**
+1. Update contract addresses in `FAMOUS_MONAD_TOKENS`
+2. Add real Monad mainnet RPC endpoints
+3. Integrate price oracle for live token prices
 3. Implement caching strategies
-4. Add loading states for real API calls
+4. Add loading states for token balance calls
 
 ### **Performance Considerations:**
-- Portfolio data is fetched only when address changes
+- Famous token balances are fetched only when address changes
 - News feed auto-refreshes every 30 minutes
 - Settings are persisted to localStorage immediately
 - Farcaster SDK initialization has 3-second timeout
 - Wagmi handles wallet state efficiently
 - Components use React.memo where appropriate
+- Limited to 7 famous tokens for fast loading
 
 ### **Testing Strategies:**
 - Test both Farcaster and standalone modes
@@ -667,6 +675,7 @@ useEffect(() => {
 - Validate address input handling
 - Test social sharing across different platforms
 - Verify auto-connection behavior
+- Test famous token balance detection
 
 ---
 
@@ -681,17 +690,19 @@ This architecture provides:
 - Wagmi handles all wallet-related complexity
 
 ### **Scalability**
-- Easy to add new portfolio features and badge types
+- Easy to add new famous tokens and badge types
 - Modular news system ready for multiple sources
 - Database integration ready for user accounts
 - Wallet system ready for multiple chains
+- Famous token list easily expandable
 
 ### **User Experience**
 - Seamless onboarding for both Farcaster and web users
 - Automatic wallet connection when available
 - Graceful degradation when services are unavailable
 - Persistent settings across sessions
-- Fast loading with proper loading states
+- Fast loading with famous tokens only
+- Clean interface focused on popular tokens
 
 ### **Developer Experience**
 - Comprehensive TypeScript types
@@ -699,6 +710,7 @@ This architecture provides:
 - Well-documented code with inline comments
 - Easy-to-understand file structure
 - Official integrations (Wagmi, Farcaster SDK)
+- Simple token addition process
 
 ### **Cross-Platform Compatibility**
 - Works seamlessly in Farcaster and standalone
@@ -712,6 +724,7 @@ This architecture provides:
 - Input validation and sanitization
 - Comprehensive error boundaries
 - Timeout handling for external services
+- Limited token scope reduces attack surface
 
 ---
 
