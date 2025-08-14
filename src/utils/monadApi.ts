@@ -46,6 +46,8 @@ const FAMOUS_MONAD_TOKENS = [
     address: '0x3456789012345678901234567890123456789012', // Replace with real WBTC address
     symbol: 'WBTC',
     name: 'Wrapped Bitcoin',
+  }
+]
 
 // Discover NFT contracts by scanning recent blocks for Transfer events
 const discoverNFTContracts = async (userAddress: string): Promise<string[]> => {
