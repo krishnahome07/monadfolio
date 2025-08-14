@@ -2,9 +2,6 @@ import { Portfolio, Asset, NFT, Badge, NewsItem, UserStats } from '../types/port
 import type { Context } from '@farcaster/frame-core';
 
 export const fetchUserStats = async (address: string): Promise<UserStats> => {
-  console.log('📊 Fetching user stats for address:', address);
-  
-  // Return empty stats - no mock data
   return {
     monadBalance: 0,
     totalTransactions: 0,
@@ -15,14 +12,10 @@ export const fetchUserStats = async (address: string): Promise<UserStats> => {
 };
 
 export const fetchPortfolio = async (address: string, farcasterUser?: Context.User): Promise<Portfolio> => {
-  console.log('📊 Fetching portfolio for address:', address);
-  
-  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1500));
   
   const userStats = await fetchUserStats(address);
   
-  // Return empty portfolio - no mock data
   return {
     totalValue: 0,
     assets: [],
@@ -37,7 +30,6 @@ export const fetchUserBadges = async (
   portfolio: Portfolio, 
   farcasterUser?: Context.User
 ): Promise<Badge[]> => {
-  // Define available badges but none are earned without real data
   const badges: Badge[] = [
     {
       id: 'monad-holder',
@@ -104,7 +96,6 @@ export const fetchUserBadges = async (
     }
   ];
 
-  // Only the Farcaster connection badge can be earned
   badges.forEach(badge => {
     if (badge.earned) {
       badge.earnedAt = new Date();
@@ -115,11 +106,9 @@ export const fetchUserBadges = async (
 };
 
 export const fetchMonadNews = async (): Promise<NewsItem[]> => {
-  // Return empty news array - no mock data
   return [];
 };
 
 export const validateMonadAddress = (address: string): boolean => {
-  // Basic Ethereum address validation
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };

@@ -8,9 +8,15 @@ A beautiful, production-ready Farcaster mini-app that transforms your Monad wall
 
 Monadfolio is a comprehensive Farcaster mini-app designed to be your daily companion for managing and showcasing your Monad on-chain identity. It combines beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
 
-**Current Status**: The app is fully functional as a portfolio viewer and badge system. Portfolio data and news feeds are currently in development mode (no live blockchain data yet).
+**Current Status**: The app is fully functional with proper Farcaster wallet integration using Wagmi. Portfolio data and news feeds are currently in development mode (no live blockchain data yet).
 
 ## ✨ Core Features
+
+### 🔗 Farcaster Wallet Integration
+- **Native Wallet Connection**: Seamless integration with Farcaster wallets using official Wagmi connector
+- **Auto-Connection**: Automatically connects to your Farcaster wallet when available
+- **Multi-Chain Support**: Ready for Base, Ethereum Mainnet, and Monad Testnet
+- **Graceful Fallback**: Manual address entry when wallet connection isn't available
 
 ### 📊 Portfolio Visualization
 - **Visual Portfolio**: Stunning colored block visualization where each block's size represents your asset allocation
@@ -43,14 +49,14 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 ### 📰 Monad News Hub
 - **Organized Categories**: Official updates, ecosystem news, and industry coverage
 - **Smart Filtering**: Filter news by category (Official, Ecosystem, General)
-- **Real-time Updates**: Auto-refresh functionality (currently in development)
+- **Real-time Updates**: Auto-refresh functionality (framework ready)
 - **External Links**: Direct access to full articles and announcements
 - **Clean Interface**: Easy-to-read news feed with publication timestamps
 
 ### 🎮 Social Features
 - **🔗 Farcaster Integration**: Native miniapp experience within Farcaster
 - **📱 Standalone Web App**: Full functionality outside of Farcaster
-- **🤝 Wallet Connection**: Support for manual address entry and demo mode
+- **🤝 Wallet Connection**: Seamless Wagmi-based wallet integration
 - **💬 Social Sharing**: Native Farcaster composer integration for sharing portfolios and badges
 - **👤 User Profiles**: Display Farcaster user information when connected
 
@@ -68,9 +74,14 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 - **Vite** - Fast build tool and development server
 - **Lucide React** - Beautiful, customizable icons
 
+### Wallet Integration
+- **Wagmi** - React hooks for Ethereum wallet integration
+- **@farcaster/miniapp-wagmi-connector** - Official Farcaster wallet connector
+- **Viem** - TypeScript interface for Ethereum
+
 ### State Management
 - **React Query (@tanstack/react-query)** - Efficient data fetching and caching
-- **Custom Hooks** - Modular state management with `usePortfolio`, `useFarcasterSDK`, `useMonadNews`
+- **Custom Hooks** - Modular state management with `usePortfolio`, `useFarcasterSDK`, `useMonadNews`, `useWalletConnection`
 - **Local Storage** - Persistent user settings and preferences
 
 ### Farcaster Integration
@@ -93,35 +104,37 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 ```
 src/
 ├── components/              # React components
-│   ├── WalletConnect.tsx       # Wallet connection interface
+│   ├── WalletConnect.tsx       # Wallet connection interface with Farcaster integration
 │   ├── PortfolioSnapshot.tsx   # Main portfolio visualization
 │   ├── BadgeCollection.tsx     # Achievement badges display
 │   ├── MonadNews.tsx           # News feed component
 │   └── MaintenanceMode.tsx     # Maintenance screen
 ├── hooks/                   # Custom React hooks
-│   ├── useFarcasterSDK.ts      # Farcaster integration logic
+│   ├── useFarcasterSDK.ts      # Farcaster SDK initialization and context
+│   ├── useWalletConnection.ts  # Wagmi wallet connection management
 │   ├── usePortfolio.ts         # Portfolio data management
 │   └── useMonadNews.ts         # News data management
+├── lib/                     # External service integrations
+│   ├── wagmi.ts                # Wagmi configuration with Farcaster connector
+│   └── supabase.ts             # Database client configuration
 ├── utils/                   # Utility functions
 │   └── monadApi.ts             # Blockchain API integration (mock data)
 ├── types/                   # TypeScript type definitions
 │   └── portfolio.ts            # Portfolio, badge, and news types
-├── lib/                     # External service integrations
-│   └── supabase.ts             # Database client configuration
-└── App.tsx                  # Main application component
+└── App.tsx                  # Main application component with providers
 ```
 
 ## 🎮 How to Use
 
 ### For Users
 1. **🔗 Connect**: 
-   - **In Farcaster**: Automatic connection with your verified wallet addresses
+   - **In Farcaster**: Automatic wallet detection and connection
    - **Web App**: Manual wallet address entry or use demo mode
 2. **👀 Visualize**: View your portfolio as stunning colored block charts
 3. **🎨 Customize**: Choose from 5 color palettes and manage asset visibility
 4. **🏆 Achieve**: Earn badges based on your wallet activity (Farcaster connection badge currently available)
 5. **📢 Share**: Cast your portfolio and achievements to your Farcaster network
-6. **📰 Stay Informed**: Browse the news section (content in development)
+6. **📰 Stay Informed**: Browse the news section (framework ready for live data)
 
 ### For Developers
 1. **📥 Clone** the repository
@@ -204,7 +217,7 @@ CREATE TABLE users (
 - **Error Boundaries**: Graceful error handling throughout the application
 
 ### Farcaster Integration Security
-- **Secure SDK**: Uses official Farcaster miniapp SDK
+- **Official SDK**: Uses official Farcaster miniapp SDK and Wagmi connector
 - **Context Validation**: Proper validation of Farcaster user context
 - **Privacy Respect**: Only accesses necessary user data
 - **Timeout Handling**: Prevents infinite loading states
@@ -213,6 +226,7 @@ CREATE TABLE users (
 - **Non-custodial**: Never stores private keys or sensitive wallet data
 - **Address Validation**: Validates Ethereum address format
 - **Privacy Controls**: Users control what portfolio data is shared
+- **Official Connectors**: Uses official Wagmi and Farcaster connectors
 
 ## 🌐 Deployment
 
@@ -231,6 +245,7 @@ The app is deployed on Vercel with:
 ## 🎯 Current Implementation Status
 
 ### ✅ Fully Implemented
+- **Farcaster Wallet Integration**: Complete with official Wagmi connector
 - **Portfolio Visualization**: Complete with color palettes and asset management
 - **Badge System**: Full badge collection with progress tracking
 - **Farcaster Integration**: Native miniapp support with social sharing
@@ -274,6 +289,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Monad Team** - For building an incredible high-performance blockchain
 - **Farcaster Team** - For the excellent miniapp SDK and platform
+- **Wagmi Team** - For the robust wallet integration library
 - **Supabase** - For the robust backend-as-a-service platform
 - **Tailwind CSS** - For the beautiful utility-first CSS framework
 - **Lucide** - For the comprehensive icon library
@@ -290,7 +306,7 @@ For support, feature requests, or bug reports:
 ### Phase 1: Core Infrastructure ✅
 - [x] Portfolio visualization system
 - [x] Badge collection and progress tracking
-- [x] Farcaster miniapp integration
+- [x] Farcaster miniapp integration with proper wallet connection
 - [x] Responsive design implementation
 - [x] Social sharing functionality
 
@@ -328,3 +344,4 @@ For detailed technical information:
 - [Component Documentation](./src/components/) - Individual component details and props
 - [API Integration](./src/utils/monadApi.ts) - Current mock API implementation
 - [Farcaster Integration](./src/hooks/useFarcasterSDK.ts) - Social features implementation details
+- [Wallet Integration](./src/hooks/useWalletConnection.ts) - Wagmi wallet connection implementation

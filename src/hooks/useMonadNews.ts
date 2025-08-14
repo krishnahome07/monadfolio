@@ -12,10 +12,8 @@ export const useMonadNews = () => {
     setError(null);
     
     try {
-      console.log('📰 Loading Monad news...');
       const newsData = await fetchMonadNews();
       setNews(newsData);
-      console.log('✅ News loaded successfully');
     } catch (err) {
       console.error('❌ Error loading news:', err);
       setError('Failed to load news');
@@ -36,7 +34,6 @@ export const useMonadNews = () => {
   useEffect(() => {
     loadNews();
     
-    // Refresh news every 30 minutes
     const interval = setInterval(loadNews, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);

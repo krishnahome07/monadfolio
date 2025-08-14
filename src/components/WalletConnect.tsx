@@ -79,13 +79,7 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
         
         <div className="p-6 text-center">
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
-            <div className="font-semibold text-green-800 mb-2">✅ Connected Address</div>
-            <div className="font-mono text-sm text-green-700 break-all">
-              {walletAddress}
-            </div>
-          </div>
           
-          <button
             onClick={onWalletDisconnect}
             className="text-red-600 hover:text-red-700 text-sm font-medium"
           >

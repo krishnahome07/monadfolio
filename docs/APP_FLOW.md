@@ -10,12 +10,13 @@ This document provides a comprehensive overview of how the Monadfolio applicatio
 4. [Component Rendering Flow](#4-component-rendering-flow)
 5. [Key Components Called Initially](#5-key-components-called-initially)
 6. [State Management](#6-state-management)
-7. [Farcaster Integration](#7-farcaster-integration)
-8. [Database Integration](#8-database-integration)
-9. [Environment Configuration](#9-environment-configuration)
-10. [Responsive Flow](#10-responsive-flow)
-11. [Error Handling](#11-error-handling)
-12. [Data Flow Architecture](#12-data-flow-architecture)
+7. [Wallet Integration](#7-wallet-integration)
+8. [Farcaster Integration](#8-farcaster-integration)
+9. [Database Integration](#9-database-integration)
+10. [Environment Configuration](#10-environment-configuration)
+11. [Responsive Flow](#11-responsive-flow)
+12. [Error Handling](#12-error-handling)
+13. [Data Flow Architecture](#13-data-flow-architecture)
 
 ---
 
@@ -25,12 +26,12 @@ This document provides a comprehensive overview of how the Monadfolio applicatio
 index.html → src/main.tsx → src/App.tsx → MonadfolioApp()
 ```
 
-The application follows a standard React initialization pattern with Farcaster miniapp integration for portfolio visualization and social features.
+The application follows a standard React initialization pattern with Farcaster miniapp integration and Wagmi wallet connectivity for portfolio visualization and social features.
 
 ### **Entry Point Details:**
 1. **`index.html`** loads with Farcaster miniapp metadata and CSP headers
 2. **`src/main.tsx`** creates React root and renders App component with error boundaries
-3. **`src/App.tsx`** provides React Query context and renders MonadfolioApp
+3. **`src/App.tsx`** provides React Query and Wagmi context providers, renders MonadfolioApp
 4. **`MonadfolioApp()`** contains all application logic and state management
 
 ---
@@ -40,15 +41,20 @@ The application follows a standard React initialization pattern with Farcaster m
 ### **Critical Path:**
 - **`index.html`** - Contains meta tags, CSP headers, and Farcaster miniapp configuration
 - **`src/main.tsx`** - React entry point with error handling
-- **`src/App.tsx`** - Main application wrapper with QueryClientProvider
+- **`src/App.tsx`** - Main application wrapper with QueryClientProvider and WagmiProvider
+
+### **Configuration Files:**
+- **`src/lib/wagmi.ts`** - Wagmi configuration with Farcaster connector and chain setup
+- **`src/lib/supabase.ts`** - Database client configuration (optional)
 
 ### **Hook Dependencies:**
 - **`src/hooks/useFarcasterSDK.ts`** - Farcaster SDK initialization (loads first)
+- **`src/hooks/useWalletConnection.ts`** - Wagmi wallet connection management
 - **`src/hooks/usePortfolio.ts`** - Portfolio data management (depends on address)
 - **`src/hooks/useMonadNews.ts`** - News feed management (independent)
 
 ### **Component Dependencies:**
-- **`src/components/WalletConnect.tsx`** - Wallet connection interface
+- **`src/components/WalletConnect.tsx`** - Wallet connection interface with Farcaster integration
 - **`src/components/PortfolioSnapshot.tsx`** - Main portfolio visualization
 - **`src/components/BadgeCollection.tsx`** - Achievement system
 - **`src/components/MonadNews.tsx`** - News feed display
@@ -62,19 +68,23 @@ The application follows a standard React initialization pattern with Farcaster m
 // 1. Farcaster SDK (always first)
 const { context, isReady, isInFarcaster } = useFarcasterSDK();
 
-// 2. State management
+// 2. Wagmi wallet connection
+const { isConnected, address, isConnecting, connect, disconnect, hasWalletAvailable } = useWalletConnection();
+
+// 3. State management
 const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
 const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+const [manualAddress, setManualAddress] = useState<string | null>(null);
 
-// 3. Auto-connection effect (depends on Farcaster context)
+// 4. Address resolution effect
 useEffect(() => {
-  // Auto-connect logic for Farcaster users
-}, [isReady, isInFarcaster, context?.user, connectedAddress]);
+  setConnectedAddress(address || manualAddress);
+}, [address, manualAddress]);
 
-// 4. Portfolio data (depends on connected address)
+// 5. Portfolio data (depends on connected address)
 const { portfolio, badges, loading, error, settings, updateSettings } = usePortfolio(connectedAddress, context?.user);
 
-// 5. News data (independent)
+// 6. News data (independent)
 const { news, loading: newsLoading, error: newsError, refreshNews } = useMonadNews();
 ```
 
@@ -86,29 +96,32 @@ const { news, loading: newsLoading, error: newsError, refreshNews } = useMonadNe
 - Calls `sdk.actions.ready()` to hide splash screen if successful
 - Sets `isInFarcaster` flag based on context availability
 
-#### **Step 2: Auto-Connection Logic**
+#### **Step 2: Wagmi Wallet Connection**
 ```typescript
+// Auto-connect logic in useWalletConnection
 useEffect(() => {
-  if (isReady && isInFarcaster && context?.user && !connectedAddress) {
-    // Priority 1: Verified addresses
-    if (context.user.verifications && context.user.verifications.length > 0) {
-      setConnectedAddress(context.user.verifications[0]);
-    }
-    // Priority 2: Custody address
-    else if (context.user.custodyAddress) {
-      setConnectedAddress(context.user.custodyAddress);
+  if (isReady && isInFarcaster && !isConnected && !hasAttemptedAutoConnect && connectors.length > 0) {
+    setHasAttemptedAutoConnect(true);
+    const farcasterConnector = connectors[0]; // Farcaster miniapp connector
+    if (farcasterConnector) {
+      connect({ connector: farcasterConnector });
     }
   }
-}, [isReady, isInFarcaster, context?.user, connectedAddress]);
+}, [isReady, isInFarcaster, isConnected, hasAttemptedAutoConnect, connectors, connect]);
 ```
 
-#### **Step 3: Portfolio Data Loading**
+#### **Step 3: Address Resolution**
+- Connected address is either wallet address (from Wagmi) or manual address
+- Updates automatically when either source changes
+- Triggers portfolio data loading
+
+#### **Step 4: Portfolio Data Loading**
 - `usePortfolio.ts` triggers when `connectedAddress` changes
 - Loads portfolio data via `fetchPortfolio()`
 - Calculates badges via `fetchUserBadges()`
 - Manages settings from localStorage
 
-#### **Step 4: News Feed Setup**
+#### **Step 5: News Feed Setup**
 - `useMonadNews.ts` loads independently
 - Sets up auto-refresh every 30 minutes
 - Categorizes news into official, ecosystem, and general
@@ -141,12 +154,20 @@ return (
 ### **Main Interface Structure:**
 ```typescript
 {!connectedAddress ? (
+  /* Wallet Connection Screen */
   <WalletConnect 
-    onConnect={handleConnect}
+    onConnect={handleManualConnect}
+    onWalletConnect={connect}
+    onWalletDisconnect={disconnect}
     isInFarcaster={isInFarcaster}
+    isWalletConnected={isConnected}
+    walletAddress={address}
+    isConnecting={isConnecting}
+    hasWalletAvailable={hasWalletAvailable}
     farcasterUser={context?.user}
   />
 ) : (
+  /* Portfolio Interface */
   <>
     {/* Navigation Tabs */}
     <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -167,28 +188,34 @@ return (
 ## 5. **Key Components Called Initially**
 
 ### **1. `src/components/WalletConnect.tsx`**
-**Purpose**: Handles wallet connection and user onboarding
+**Purpose**: Handles both Wagmi wallet connection and manual address entry
 **Props**:
-- `onConnect: (address: string) => void`
-- `isInFarcaster: boolean`
-- `farcasterUser?: Context.User`
+- `onConnect: (address: string) => void` - Manual address connection
+- `onWalletConnect: () => void` - Wagmi wallet connection
+- `onWalletDisconnect: () => void` - Wallet disconnection
+- `isInFarcaster: boolean` - Farcaster context availability
+- `isWalletConnected: boolean` - Wagmi connection status
+- `walletAddress?: string` - Connected wallet address
+- `isConnecting: boolean` - Connection loading state
+- `hasWalletAvailable: boolean` - Wallet connector availability
+- `farcasterUser?: Context.User` - Farcaster user data
 
 **Behavior**:
-- Shows Farcaster user info if available
-- Provides manual address input
-- Includes demo address functionality
-- Validates Monad addresses using `validateMonadAddress()`
+- Shows Farcaster wallet connection button when available
+- Provides manual address input for any Monad address
+- Displays connected state when wallet is connected
+- Validates addresses using `validateMonadAddress()`
 
 ### **2. `src/components/PortfolioSnapshot.tsx`**
 **Purpose**: Main portfolio visualization with colored blocks
 **Props**:
-- `portfolio: Portfolio`
-- `settings: PortfolioSettings`
-- `onSettingsChange: (settings: Partial<PortfolioSettings>) => void`
-- `onToggleAsset: (symbol: string) => void`
-- `onRefresh: () => void`
-- `loading?: boolean`
-- `userAddress?: string`
+- `portfolio: Portfolio` - Portfolio data
+- `settings: PortfolioSettings` - Display settings
+- `onSettingsChange: (settings: Partial<PortfolioSettings>) => void` - Settings updates
+- `onToggleAsset: (symbol: string) => void` - Asset visibility toggle
+- `onRefresh: () => void` - Portfolio refresh
+- `loading?: boolean` - Loading state
+- `userAddress?: string` - Connected address
 
 **Features**:
 - 5 color palette options
@@ -199,8 +226,8 @@ return (
 ### **3. `src/components/BadgeCollection.tsx`**
 **Purpose**: Achievement system displaying earned and available badges
 **Props**:
-- `badges: Badge[]`
-- `onShareBadges?: () => void`
+- `badges: Badge[]` - Badge data
+- `onShareBadges?: () => void` - Badge sharing
 
 **Features**:
 - Category filtering (all, nft, portfolio, usage)
@@ -211,9 +238,9 @@ return (
 ### **4. `src/components/MonadNews.tsx`**
 **Purpose**: Curated news feed from Monad ecosystem
 **Props**:
-- `news: NewsItem[]`
-- `loading?: boolean`
-- `onRefresh?: () => void`
+- `news: NewsItem[]` - News data
+- `loading?: boolean` - Loading state
+- `onRefresh?: () => void` - News refresh
 
 **Features**:
 - Category filtering (all, official, ecosystem, news)
@@ -232,9 +259,21 @@ const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('por
 
 // Connection state
 const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+const [manualAddress, setManualAddress] = useState<string | null>(null);
 
 // Environment state
 const isAppEnabled = import.meta.env.VITE_APP_ENABLED !== 'false';
+```
+
+### **Wallet State (`useWalletConnection` hook):**
+```typescript
+// Wagmi state
+const { isConnected, address, isConnecting } = useAccount();
+const { connect, connectors, isPending } = useConnect();
+const { disconnect } = useDisconnect();
+
+// Auto-connection state
+const [hasAttemptedAutoConnect, setHasAttemptedAutoConnect] = useState(false);
 ```
 
 ### **Portfolio State (`usePortfolio` hook):**
@@ -269,21 +308,63 @@ const [isInFarcaster, setIsInFarcaster] = useState(false);
 - **Settings**: Stored in localStorage as `monadfolio-settings`
 - **Portfolio Data**: Fetched fresh on each load
 - **News Data**: Cached with 30-minute refresh interval
+- **Wallet Connection**: Managed by Wagmi with automatic reconnection
 
 ---
 
-## 7. **Farcaster Integration**
+## 7. **Wallet Integration**
+
+### **Wagmi Configuration (`src/lib/wagmi.ts`):**
+```typescript
+import { http, createConfig } from 'wagmi';
+import { base, mainnet } from 'wagmi/chains';
+import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
+
+export const monadTestnet = {
+  id: 41454,
+  name: 'Monad Testnet',
+  nativeCurrency: { decimals: 18, name: 'Monad', symbol: 'MON' },
+  rpcUrls: { default: { http: ['https://testnet1.monad.xyz'] } },
+  blockExplorers: { default: { name: 'Monad Explorer', url: 'https://explorer.testnet1.monad.xyz' } },
+  testnet: true,
+} as const;
+
+export const config = createConfig({
+  chains: [base, mainnet, monadTestnet],
+  transports: {
+    [base.id]: http(),
+    [mainnet.id]: http(),
+    [monadTestnet.id]: http(),
+  },
+  connectors: [miniAppConnector()]
+});
+```
+
+### **Wallet Connection Flow:**
+1. **Auto-Detection**: Checks for Farcaster wallet availability
+2. **Auto-Connection**: Attempts connection when in Farcaster context
+3. **Manual Connection**: Provides connect button when wallet is available
+4. **Fallback**: Manual address entry when no wallet is available
+5. **State Management**: Wagmi handles all connection state automatically
+
+### **Connection States:**
+- `isConnected`: Wallet is connected via Wagmi
+- `address`: Connected wallet address
+- `isConnecting`: Connection in progress
+- `hasWalletAvailable`: Farcaster wallet connector is available
+
+---
+
+## 8. **Farcaster Integration**
 
 ### **SDK Initialization Process:**
 ```typescript
 const initializeSDK = async () => {
-  // 1. Set 3-second timeout to prevent infinite loading
   const timeout = setTimeout(() => {
     setIsInFarcaster(false);
     setIsReady(true);
   }, 3000);
   
-  // 2. Check if SDK is available
   if (!sdk) {
     clearTimeout(timeout);
     setIsInFarcaster(false);
@@ -291,25 +372,27 @@ const initializeSDK = async () => {
     return;
   }
 
-  // 3. Attempt to get context
   try {
     const frameContext = await sdk.context;
     if (frameContext && (frameContext.user || frameContext.client)) {
       setContext(frameContext);
       setIsInFarcaster(true);
       await sdk.actions.ready(); // Hide splash screen
+    } else {
+      setIsInFarcaster(false);
     }
-  } catch (error) {
-    // Fallback to web app mode
+    clearTimeout(timeout);
+    setIsReady(true);
+  } catch (contextError) {
+    clearTimeout(timeout);
+    setIsInFarcaster(false);
+    setIsReady(true);
   }
-  
-  clearTimeout(timeout);
-  setIsReady(true);
 };
 ```
 
 ### **Context-Aware Features:**
-- **Auto-connection**: Automatically connects verified wallet addresses
+- **Wallet Integration**: Uses official Farcaster miniapp connector
 - **User Display**: Shows Farcaster profile information
 - **Social Sharing**: Native Farcaster composer integration
 - **Graceful Degradation**: Full functionality without Farcaster
@@ -329,7 +412,7 @@ const handleSharePortfolio = async () => {
 
 ---
 
-## 8. **Database Integration**
+## 9. **Database Integration**
 
 ### **Supabase Configuration:**
 - **File**: `src/lib/supabase.ts`
@@ -356,7 +439,7 @@ CREATE TABLE users (
 
 ---
 
-## 9. **Environment Configuration**
+## 10. **Environment Configuration**
 
 ### **Environment Variables:**
 ```env
@@ -387,49 +470,52 @@ const hasValidConfig = supabaseUrl && supabaseKey &&
 
 ---
 
-## 10. **Responsive Flow**
+## 11. **Responsive Flow**
 
 ### **Context-Aware Behavior:**
 
 #### **In Farcaster Environment:**
 ```typescript
-if (isInFarcaster && context?.user) {
-  // Show Farcaster user profile
+if (isInFarcaster && hasWalletAvailable) {
+  // Show Farcaster wallet connection button
   // Use miniapp SDK for native sharing
   // Display connection status indicator
-  // Auto-connect verified addresses
+  // Auto-connect wallet when available
 }
 ```
 
 #### **Standalone Web Application:**
 ```typescript
 if (!isInFarcaster) {
-  // Show manual wallet connection
+  // Show manual wallet connection or address entry
   // Use Web Share API or clipboard fallback
   // Full functionality without social features
 }
 ```
 
-#### **Demo Mode:**
+#### **Wallet Connection States:**
 ```typescript
-const handleDemoAddress = () => {
-  const demoAddress = '0x742d35Cc6634C0532925a3b8D4C9db96590c4C87';
-  setManualAddress(demoAddress);
-  onConnect(demoAddress);
-};
+if (isWalletConnected && walletAddress) {
+  // Show connected state with disconnect option
+  // Use wallet address for portfolio loading
+} else if (hasWalletAvailable) {
+  // Show wallet connection button
+} else {
+  // Show manual address entry
+}
 ```
 
 ---
 
-## 11. **Error Handling**
+## 12. **Error Handling**
 
 ### **Application-Level Error Boundaries:**
 ```typescript
-// Main App wrapper with try-catch
 function MonadfolioApp() {
   try {
     // Main application logic
   } catch (error) {
+    console.error('App error:', error);
     return <ErrorFallback error={error} />;
   }
 }
@@ -443,6 +529,7 @@ const loadPortfolio = async () => {
     const portfolioData = await fetchPortfolio(address, farcasterUser);
     setPortfolio(portfolioData);
   } catch (err) {
+    console.error('❌ Error loading portfolio:', err);
     setError('Failed to load portfolio data');
   } finally {
     setLoading(false);
@@ -450,9 +537,16 @@ const loadPortfolio = async () => {
 };
 ```
 
+### **Wallet Connection Error Handling:**
+```typescript
+// Wagmi handles most wallet errors automatically
+// Timeout handling for SDK initialization
+// Graceful fallback when connectors aren't available
+```
+
 ### **Graceful Degradation Strategies:**
 - **SDK Initialization Fails**: App loads as standalone web app
-- **Wallet Connection Issues**: Demo mode with sample data
+- **Wallet Connection Issues**: Manual address entry available
 - **API Failures**: Show error messages with retry buttons
 - **Share Failures**: Multiple fallback methods (SDK → Web Share → Clipboard)
 
@@ -464,7 +558,7 @@ const loadPortfolio = async () => {
 
 ---
 
-## 12. **Data Flow Architecture**
+## 13. **Data Flow Architecture**
 
 ### **Data Sources:**
 ```typescript
@@ -481,6 +575,8 @@ src/utils/monadApi.ts:
 User Action → Hook Updates → Component Re-render → API Call (Mock) → State Update
      ↓
 Local Storage ← Settings Persistence
+     ↓
+Wagmi State ← Wallet Connection
      ↓
 UI Update → Social Sharing (if applicable)
 ```
@@ -500,14 +596,27 @@ const badges = [
 ];
 ```
 
+### **Wallet Address Resolution:**
+```typescript
+// Priority order for address resolution:
+// 1. Connected wallet address (from Wagmi)
+// 2. Manual address entry
+// 3. null (shows connection screen)
+
+useEffect(() => {
+  setConnectedAddress(address || manualAddress);
+}, [address, manualAddress]);
+```
+
 ---
 
 ## 🔧 Development Notes
 
 ### **Key Files for Debugging:**
 - **App initialization**: `src/hooks/useFarcasterSDK.ts`
+- **Wallet connection**: `src/hooks/useWalletConnection.ts`
 - **Portfolio loading**: `src/utils/monadApi.ts` (currently mock data)
-- **Wallet connection**: `src/components/WalletConnect.tsx`
+- **Wagmi configuration**: `src/lib/wagmi.ts`
 - **State management**: `src/hooks/usePortfolio.ts`
 - **Settings persistence**: localStorage operations in `usePortfolio.ts`
 
@@ -524,6 +633,12 @@ const badges = [
 2. Add calculation logic based on portfolio data
 3. Update badge icons and descriptions
 4. Test badge earning conditions
+
+#### **Wallet Integration Changes:**
+1. Update Wagmi configuration in `src/lib/wagmi.ts`
+2. Modify `useWalletConnection.ts` hook
+3. Update `WalletConnect.tsx` component
+4. Test connection flows
 
 #### **Database Integration:**
 1. Uncomment database calls in hooks
@@ -542,14 +657,16 @@ const badges = [
 - News feed auto-refreshes every 30 minutes
 - Settings are persisted to localStorage immediately
 - Farcaster SDK initialization has 3-second timeout
+- Wagmi handles wallet state efficiently
 - Components use React.memo where appropriate
 
 ### **Testing Strategies:**
 - Test both Farcaster and standalone modes
-- Verify graceful degradation when services fail
-- Test all badge earning conditions
+- Verify wallet connection and disconnection flows
+- Test graceful degradation when services fail
 - Validate address input handling
 - Test social sharing across different platforms
+- Verify auto-connection behavior
 
 ---
 
@@ -561,14 +678,17 @@ This architecture provides:
 - Each component has a single, well-defined responsibility
 - Hooks encapsulate related state and logic
 - Clear separation between UI and business logic
+- Wagmi handles all wallet-related complexity
 
 ### **Scalability**
 - Easy to add new portfolio features and badge types
 - Modular news system ready for multiple sources
 - Database integration ready for user accounts
+- Wallet system ready for multiple chains
 
 ### **User Experience**
 - Seamless onboarding for both Farcaster and web users
+- Automatic wallet connection when available
 - Graceful degradation when services are unavailable
 - Persistent settings across sessions
 - Fast loading with proper loading states
@@ -578,12 +698,20 @@ This architecture provides:
 - Clear error handling and logging
 - Well-documented code with inline comments
 - Easy-to-understand file structure
+- Official integrations (Wagmi, Farcaster SDK)
 
 ### **Cross-Platform Compatibility**
 - Works seamlessly in Farcaster and standalone
 - Responsive design for all screen sizes
 - Progressive enhancement approach
 - Fallback strategies for all features
+
+### **Security & Reliability**
+- Official wallet connectors
+- Non-custodial approach
+- Input validation and sanitization
+- Comprehensive error boundaries
+- Timeout handling for external services
 
 ---
 

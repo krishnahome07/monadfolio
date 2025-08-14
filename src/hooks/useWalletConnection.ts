@@ -9,13 +9,10 @@ export const useWalletConnection = () => {
   const { isInFarcaster, isReady } = useFarcasterSDK();
   const [hasAttemptedAutoConnect, setHasAttemptedAutoConnect] = useState(false);
 
-  // Auto-connect when in Farcaster and SDK is ready
   useEffect(() => {
     if (isReady && isInFarcaster && !isConnected && !hasAttemptedAutoConnect && connectors.length > 0) {
-      console.log('🔗 Attempting auto-connect with Farcaster wallet...');
       setHasAttemptedAutoConnect(true);
       
-      // Use the first (and likely only) connector which should be the Farcaster miniapp connector
       const farcasterConnector = connectors[0];
       if (farcasterConnector) {
         connect({ connector: farcasterConnector });

@@ -24,7 +24,6 @@ function MonadfolioApp() {
     const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
     const [manualAddress, setManualAddress] = useState<string | null>(null);
     
-    // Update connectedAddress when wallet address or manual address changes
     useEffect(() => {
       setConnectedAddress(address || manualAddress);
     }, [address, manualAddress]);
@@ -43,13 +42,14 @@ function MonadfolioApp() {
     const { news, loading: newsLoading, error: newsError, refreshNews } = useMonadNews();
 
     const handleManualConnect = (address: string) => {
-      console.log('🔍 Connecting to address:', address);
       setManualAddress(address);
     };
 
+    // Check if app is enabled via environment variable
     const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
     const isAppEnabled = appEnabledEnv !== 'false';
 
+    // Loading state while SDK initializes
     if (!isReady) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -62,6 +62,7 @@ function MonadfolioApp() {
       );
     }
 
+    // Maintenance mode check
     if (!isAppEnabled) {
       return <MaintenanceMode />;
     }
@@ -88,8 +89,9 @@ function MonadfolioApp() {
             )}
           </div>
 
-          {/* Wallet Connection */}
+          {/* Main Content */}
           {!connectedAddress ? (
+            /* Wallet Connection Screen */
             <div className="max-w-md mx-auto">
               <WalletConnect 
                 onConnect={handleManualConnect}
@@ -104,6 +106,7 @@ function MonadfolioApp() {
               />
             </div>
           ) : (
+            /* Portfolio Interface */
             <div className="space-y-6">
               {/* Navigation Tabs */}
               <div className="flex justify-center">
@@ -238,6 +241,7 @@ function MonadfolioApp() {
       </div>
     );
   } catch (error) {
+    console.error('App error:', error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full mx-4">
