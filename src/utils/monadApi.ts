@@ -84,15 +84,22 @@ const KNOWN_TOKENS = [
   // Add more tokens as they become available on testnet
 ];
 
-// Known NFT contracts on Monad Testnet
-const KNOWN_NFTS = [
-  // Add real NFT contract addresses when available
-  // {
-  //   address: '0x...', 
-  //   name: 'Monad Genesis',
-  //   symbol: 'MGEN'
-  // }
-];
+// ERC-165 ABI for interface detection
+const ERC165_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'interfaceId', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function'
+  }
+] as const;
+
+// ERC-721 interface ID
+const ERC721_INTERFACE_ID = '0x80ac58cd';
+
+// Common NFT event signatures for scanning
+const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 const fetchNFTMetadata = async (tokenURI: string) => {
   try {
@@ -125,8 +132,58 @@ const fetchNFTMetadata = async (tokenURI: string) => {
   }
 };
 
-const fetchNFTsFromContract = async (contractAddress: string, userAddress: string, contractInfo: any): Promise<NFT[]> => {
+// Check if a contract is an ERC-721 NFT contract
+const isERC721Contract = async (contractAddress: string): Promise<boolean> => {
   try {
+    const supportsERC721 = await monadClient.readContract({
+      address: getAddress(contractAddress),
+      abi: ERC165_ABI,
+      functionName: 'supportsInterface',
+      args: [ERC721_INTERFACE_ID]
+    });
+    
+    return supportsERC721;
+  } catch (error) {
+    // If ERC-165 check fails, try to call balanceOf as fallback
+    try {
+      await monadClient.readContract({
+        address: getAddress(contractAddress),
+        abi: ERC721_ABI,
+        functionName: 'balanceOf',
+        args: [getAddress('0x0000000000000000000000000000000000000001')] // dummy address
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+};
+
+// Get contract name safely
+const getContractName = async (contractAddress: string): Promise<string> => {
+  try {
+    const name = await monadClient.readContract({
+      address: getAddress(contractAddress),
+      abi: ERC721_ABI,
+      functionName: 'name'
+    });
+    return name || `Contract ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
+  } catch (error) {
+    return `Contract ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
+  }
+};
+
+// Fetch NFTs from a specific contract
+const fetchNFTsFromContract = async (contractAddress: string, userAddress: string): Promise<NFT[]> => {
+  try {
+    console.log(`🔍 Checking NFTs in contract: ${contractAddress}`);
+    
+    // Check if it's an ERC-721 contract
+    const isNFTContract = await isERC721Contract(contractAddress);
+    if (!isNFTContract) {
+      return [];
+    }
+    
     // Get NFT balance
     const balance = await monadClient.readContract({
       address: getAddress(contractAddress),
@@ -136,10 +193,13 @@ const fetchNFTsFromContract = async (contractAddress: string, userAddress: strin
     });
     
     const nftBalance = Number(balance);
+    console.log(`📊 NFT balance in ${contractAddress}: ${nftBalance}`);
+    
     if (nftBalance === 0) {
       return [];
     }
     
+    const contractName = await getContractName(contractAddress);
     const nfts: NFT[] = [];
     
     // Fetch up to 10 NFTs to avoid too many requests
@@ -168,25 +228,64 @@ const fetchNFTsFromContract = async (contractAddress: string, userAddress: strin
         
         // Handle image URL
         let imageUrl = metadata.image;
-        if (imageUrl.startsWith('ipfs://')) {
+        if (imageUrl && imageUrl.startsWith('ipfs://')) {
           imageUrl = `https://ipfs.io/ipfs/${imageUrl.slice(7)}`;
         }
         
         nfts.push({
           id: `${contractAddress}-${tokenId}`,
-          name: `${metadata.name} #${tokenId}`,
-          collection: contractInfo.name,
+          name: `${metadata.name || contractName} #${tokenId}`,
+          collection: contractName,
           imageUrl: imageUrl || 'https://via.placeholder.com/150?text=NFT',
           floorPrice: 0 // Would need marketplace integration
         });
+        
+        console.log(`✅ Fetched NFT: ${metadata.name || contractName} #${tokenId}`);
       } catch (tokenError) {
-        console.error(`Error fetching NFT ${i}:`, tokenError);
+        console.error(`❌ Error fetching NFT ${i} from ${contractAddress}:`, tokenError);
       }
     }
     
     return nfts;
   } catch (error) {
-    console.error(`Error fetching NFTs from ${contractInfo.name}:`, error);
+    console.error(`❌ Error fetching NFTs from contract ${contractAddress}:`, error);
+    return [];
+  }
+};
+
+// Discover NFT contracts by scanning recent blocks for Transfer events
+const discoverNFTContracts = async (userAddress: string): Promise<string[]> => {
+  try {
+    console.log('🔍 Discovering NFT contracts for address:', userAddress);
+    
+    // Get current block number
+    const currentBlock = await monadClient.getBlockNumber();
+    const fromBlock = currentBlock - BigInt(10000); // Scan last 10k blocks
+    
+    console.log(`📊 Scanning blocks ${fromBlock} to ${currentBlock}`);
+    
+    // Get Transfer events where the user is the recipient
+    const logs = await monadClient.getLogs({
+      address: undefined, // Any contract
+      topics: [
+        TRANSFER_EVENT_SIGNATURE,
+        null, // from (any address)
+        `0x000000000000000000000000${userAddress.slice(2)}` // to (user address, padded)
+      ],
+      fromBlock,
+      toBlock: currentBlock
+    });
+    
+    console.log(`📋 Found ${logs.length} Transfer events to user`);
+    
+    // Extract unique contract addresses
+    const contractAddresses = [...new Set(logs.map(log => log.address))];
+    
+    console.log(`🏭 Found ${contractAddresses.length} unique contracts:`, contractAddresses);
+    
+    return contractAddresses;
+  } catch (error) {
+    console.error('❌ Error discovering NFT contracts:', error);
     return [];
   }
 };
@@ -304,24 +403,27 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
       }
     }
     
-    // Fetch NFTs from known contracts
+    // Discover and fetch NFTs from all contracts (like Monad Explorer)
     const nfts: NFT[] = [];
-    for (const nftContract of KNOWN_NFTS) {
+    
+    console.log('🎨 Starting NFT discovery...');
+    
+    // Discover NFT contracts by scanning blockchain events
+    const discoveredContracts = await discoverNFTContracts(address);
+    
+    console.log(`🔍 Discovered ${discoveredContracts.length} potential NFT contracts`);
+    
+    // Fetch NFTs from discovered contracts
+    for (const contractAddress of discoveredContracts) {
       try {
-        const contractNFTs = await fetchNFTsFromContract(nftContract.address, address, nftContract);
+        const contractNFTs = await fetchNFTsFromContract(contractAddress, address);
         nfts.push(...contractNFTs);
       } catch (error) {
-        console.error(`Error fetching NFTs from ${nftContract.name}:`, error);
+        console.error(`❌ Error fetching NFTs from ${contractAddress}:`, error);
       }
     }
     
-    // Try to detect NFTs by checking for ERC-721 interface on common addresses
-    // This is a fallback method when we don't know specific NFT contracts
-    try {
-      await detectAndFetchNFTs(address, nfts);
-    } catch (error) {
-      console.error('Error in NFT detection:', error);
-    }
+    console.log(`🎨 Total NFTs found: ${nfts.length}`);
     
     const totalValue = assets.reduce((sum, asset) => sum + asset.value, 0);
     
@@ -359,17 +461,6 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
       userStats
     };
   }
-};
-
-const detectAndFetchNFTs = async (userAddress: string, existingNFTs: NFT[]) => {
-  // This function would implement NFT detection logic
-  // For now, it's a placeholder for future implementation
-  // You could:
-  // 1. Query known NFT marketplaces
-  // 2. Use event logs to find NFT transfers
-  // 3. Check against a registry of known NFT contracts
-  
-  console.log('🔍 NFT detection not yet implemented for unknown contracts');
 };
 
 export const fetchUserBadges = async (
