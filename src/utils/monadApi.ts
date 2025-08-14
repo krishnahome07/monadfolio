@@ -41,34 +41,13 @@ const ERC20_ABI = [
   }
 ] as const;
 
-// ERC-721 ABI for NFT checking
+// Simplified ERC-721 ABI for NFT count only
 const ERC721_ABI = [
   {
     constant: true,
     inputs: [{ name: '_owner', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ name: '', type: 'uint256' }],
-    type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [{ name: '_owner', type: 'address' }, { name: '_index', type: 'uint256' }],
-    name: 'tokenOfOwnerByIndex',
-    outputs: [{ name: '', type: 'uint256' }],
-    type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [{ name: '_tokenId', type: 'uint256' }],
-    name: 'tokenURI',
-    outputs: [{ name: '', type: 'string' }],
-    type: 'function'
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'name',
-    outputs: [{ name: '', type: 'string' }],
     type: 'function'
   }
 ] as const;
@@ -101,37 +80,6 @@ const ERC721_INTERFACE_ID = '0x80ac58cd';
 // Common NFT event signatures for scanning
 const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
-const fetchNFTMetadata = async (tokenURI: string) => {
-  try {
-    // Handle IPFS URLs
-    let metadataUrl = tokenURI;
-    if (tokenURI.startsWith('ipfs://')) {
-      metadataUrl = `https://ipfs.io/ipfs/${tokenURI.slice(7)}`;
-    }
-    
-    const response = await fetch(metadataUrl);
-    if (!response.ok) {
-      throw new Error('Failed to fetch metadata');
-    }
-    
-    const metadata = await response.json();
-    return {
-      name: metadata.name || 'Unknown NFT',
-      description: metadata.description || '',
-      image: metadata.image || '',
-      attributes: metadata.attributes || []
-    };
-  } catch (error) {
-    console.error('Error fetching NFT metadata:', error);
-    return {
-      name: 'Unknown NFT',
-      description: '',
-      image: '',
-      attributes: []
-    };
-  }
-};
-
 // Check if a contract is an ERC-721 NFT contract
 const isERC721Contract = async (contractAddress: string): Promise<boolean> => {
   try {
@@ -159,29 +107,13 @@ const isERC721Contract = async (contractAddress: string): Promise<boolean> => {
   }
 };
 
-// Get contract name safely
-const getContractName = async (contractAddress: string): Promise<string> => {
+// Get NFT count from a specific contract
+const getNFTCountFromContract = async (contractAddress: string, userAddress: string): Promise<number> => {
   try {
-    const name = await monadClient.readContract({
-      address: getAddress(contractAddress),
-      abi: ERC721_ABI,
-      functionName: 'name'
-    });
-    return name || `Contract ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
-  } catch (error) {
-    return `Contract ${contractAddress.slice(0, 6)}...${contractAddress.slice(-4)}`;
-  }
-};
-
-// Fetch NFTs from a specific contract
-const fetchNFTsFromContract = async (contractAddress: string, userAddress: string): Promise<NFT[]> => {
-  try {
-    console.log(`🔍 Checking NFTs in contract: ${contractAddress}`);
-    
     // Check if it's an ERC-721 contract
     const isNFTContract = await isERC721Contract(contractAddress);
     if (!isNFTContract) {
-      return [];
+      return 0;
     }
     
     // Get NFT balance
@@ -193,63 +125,10 @@ const fetchNFTsFromContract = async (contractAddress: string, userAddress: strin
     });
     
     const nftBalance = Number(balance);
-    console.log(`📊 NFT balance in ${contractAddress}: ${nftBalance}`);
-    
-    if (nftBalance === 0) {
-      return [];
-    }
-    
-    const contractName = await getContractName(contractAddress);
-    const nfts: NFT[] = [];
-    
-    // Fetch up to 10 NFTs to avoid too many requests
-    const maxNFTs = Math.min(nftBalance, 10);
-    
-    for (let i = 0; i < maxNFTs; i++) {
-      try {
-        // Get token ID
-        const tokenId = await monadClient.readContract({
-          address: getAddress(contractAddress),
-          abi: ERC721_ABI,
-          functionName: 'tokenOfOwnerByIndex',
-          args: [getAddress(userAddress), BigInt(i)]
-        });
-        
-        // Get token URI
-        const tokenURI = await monadClient.readContract({
-          address: getAddress(contractAddress),
-          abi: ERC721_ABI,
-          functionName: 'tokenURI',
-          args: [tokenId]
-        });
-        
-        // Fetch metadata
-        const metadata = await fetchNFTMetadata(tokenURI);
-        
-        // Handle image URL
-        let imageUrl = metadata.image;
-        if (imageUrl && imageUrl.startsWith('ipfs://')) {
-          imageUrl = `https://ipfs.io/ipfs/${imageUrl.slice(7)}`;
-        }
-        
-        nfts.push({
-          id: `${contractAddress}-${tokenId}`,
-          name: `${metadata.name || contractName} #${tokenId}`,
-          collection: contractName,
-          imageUrl: imageUrl || 'https://via.placeholder.com/150?text=NFT',
-          floorPrice: 0 // Would need marketplace integration
-        });
-        
-        console.log(`✅ Fetched NFT: ${metadata.name || contractName} #${tokenId}`);
-      } catch (tokenError) {
-        console.error(`❌ Error fetching NFT ${i} from ${contractAddress}:`, tokenError);
-      }
-    }
-    
-    return nfts;
+    return nftBalance;
   } catch (error) {
-    console.error(`❌ Error fetching NFTs from contract ${contractAddress}:`, error);
-    return [];
+    console.error(`❌ Error fetching NFT count from contract ${contractAddress}:`, error);
+    return 0;
   }
 };
 
