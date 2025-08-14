@@ -36,6 +36,8 @@ const ERC20_ABI = [
     constant: true,
     inputs: [],
     name: 'name',
+  }
+]
 
 // Discover NFT contracts by scanning recent blocks for Transfer events
 const discoverNFTContracts = async (userAddress: string): Promise<string[]> => {

@@ -104,7 +104,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
       {/* Category Filter */}
       <div className="border-b border-gray-200 p-4">
         <div className="flex space-x-2">
-          {['all', 'nft', 'portfolio', 'usage'].map((category) => (
+          {['all', 'portfolio', 'usage'].map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category as any)}

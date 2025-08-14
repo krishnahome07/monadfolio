@@ -40,7 +40,7 @@ export interface Badge {
   name: string;
   description: string;
   icon: string;
-  category: 'nft' | 'portfolio' | 'usage';
+  category: 'portfolio' | 'usage';
   earned: boolean;
   earnedAt?: Date;
   rarity: 'common' | 'rare' | 'legendary';
