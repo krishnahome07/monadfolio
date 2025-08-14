@@ -24,8 +24,10 @@ function MonadfolioApp() {
     const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
     const [manualAddress, setManualAddress] = useState<string | null>(null);
     
-    // Use either connected wallet address or manual address
-    const connectedAddress = address || manualAddress;
+    // Update connectedAddress when wallet address or manual address changes
+    useEffect(() => {
+      setConnectedAddress(address || manualAddress);
+    }, [address, manualAddress]);
 
     const { 
       portfolio, 
