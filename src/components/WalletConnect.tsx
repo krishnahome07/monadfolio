@@ -6,7 +6,6 @@ import type { Context } from '@farcaster/frame-core';
 interface WalletConnectProps {
   onConnect: (address: string) => void;
   onWalletConnect: () => void;
-  onWalletDisconnect: () => void;
   isInFarcaster: boolean;
   isWalletConnected: boolean;
   walletAddress?: string;
@@ -18,7 +17,6 @@ interface WalletConnectProps {
 export const WalletConnect: React.FC<WalletConnectProps> = ({
   onConnect,
   onWalletConnect,
-  onWalletDisconnect,
   isInFarcaster,
   isWalletConnected,
   walletAddress,
@@ -79,13 +77,10 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
         
         <div className="p-6 text-center">
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+            <div className="text-green-800 font-medium">
+              Wallet successfully connected!
+            </div>
           </div>
-          <button
-            onClick={onWalletDisconnect}
-            className="text-red-600 hover:text-red-700 text-sm font-medium"
-          >
-            Disconnect Wallet
-          </button>
         </div>
       </div>
     );

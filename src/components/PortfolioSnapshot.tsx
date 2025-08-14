@@ -150,9 +150,6 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
         <div className="mt-4 flex items-center justify-between">
           <div>
             <div className="text-3xl font-bold">
-              {settings.showTotalValue ? `$${totalVisibleValue.toLocaleString()}` : '••••••'}
-            </div>
-            <div className="text-purple-100">
               {visibleAssets.length} Monad tokens • {portfolio.nfts.length} NFTs • {portfolio.userStats?.totalTransactions || 0} Monad transactions
             </div>
           </div>

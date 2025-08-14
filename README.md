@@ -2,21 +2,19 @@
 
 A beautiful, production-ready Farcaster mini-app that transforms your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio with stunning block charts, earn achievement badges based on your on-chain activity, and stay updated with the latest Monad ecosystem news.
 
-![Monadfolio App](https://monadfolio.vercel.app/appicon.png)
-
 ## 🎯 App Overview
 
-Monadfolio is a comprehensive Farcaster mini-app designed to be your daily companion for managing and showcasing your Monad on-chain identity. It combines beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
+Monadfolio is a comprehensive Farcaster mini-app designed to showcase your Monad on-chain identity. It combines beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
 
-**Current Status**: The app is fully functional with proper Farcaster wallet integration using Wagmi. Portfolio data and news feeds are currently in development mode (no live blockchain data yet).
+**Current Status**: The app is fully functional with seamless Farcaster wallet integration using the official Wagmi connector. Portfolio data and news feeds are ready for live blockchain integration.
 
 ## ✨ Core Features
 
 ### 🔗 Farcaster Wallet Integration
-- **Native Wallet Connection**: Seamless integration with Farcaster wallets using official Wagmi connector
+- **Seamless Connection**: One-click wallet connection using official Farcaster miniapp connector
 - **Auto-Connection**: Automatically connects to your Farcaster wallet when available
 - **Multi-Chain Support**: Ready for Base, Ethereum Mainnet, and Monad Testnet
-- **Graceful Fallback**: Manual address entry when wallet connection isn't available
+- **Portfolio Viewing**: View any Monad address portfolio with manual entry option
 
 ### 📊 Portfolio Visualization
 - **Visual Portfolio**: Stunning colored block visualization where each block's size represents your asset allocation
@@ -24,7 +22,7 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 - **Privacy Controls**: Hide specific assets and toggle total portfolio value display
 - **Asset Management**: Show/hide individual tokens from your portfolio view
 - **Responsive Design**: Beautiful visualization that works on all screen sizes
-- **Social Sharing**: Cast your portfolio directly to Farcaster with one click
+- **Social Sharing**: Share your portfolio directly to Farcaster with one click
 
 ### 🏆 Achievement Badges System
 
@@ -59,6 +57,7 @@ Monadfolio is a comprehensive Farcaster mini-app designed to be your daily compa
 - **🤝 Wallet Connection**: Seamless Wagmi-based wallet integration
 - **💬 Social Sharing**: Native Farcaster composer integration for sharing portfolios and badges
 - **👤 User Profiles**: Display Farcaster user information when connected
+- **🎯 Simplified UX**: Clean, focused interface without unnecessary controls
 
 ## 🚀 Live Demo
 
@@ -247,11 +246,11 @@ The app is deployed on Vercel with:
 ### ✅ Fully Implemented
 - **Farcaster Wallet Integration**: Complete with official Wagmi connector
 - **Portfolio Visualization**: Complete with color palettes and asset management
-- **Badge System**: Full badge collection with progress tracking
+- **Badge System**: Complete badge collection with progress tracking and social sharing
 - **Farcaster Integration**: Native miniapp support with social sharing
 - **Responsive Design**: Works perfectly on all devices
 - **Settings Management**: Persistent user preferences
-- **Error Handling**: Comprehensive error boundaries and fallbacks
+- **Clean UX**: Streamlined interface focused on core functionality
 
 ### 🚧 In Development
 - **Live Blockchain Data**: Currently using mock data, ready for Monad integration
@@ -261,8 +260,9 @@ The app is deployed on Vercel with:
 ### 🔮 Future Enhancements
 - **Historical Data**: Portfolio performance tracking over time
 - **Advanced Analytics**: Detailed portfolio insights and recommendations
-- **Social Features**: Community leaderboards and competitions
+- **Enhanced Social Features**: Community leaderboards and competitions
 - **Mobile App**: Progressive Web App features
+- **Advanced Wallet Management**: Multi-wallet support and switching
 
 ## 🤝 Contributing
 
@@ -306,9 +306,10 @@ For support, feature requests, or bug reports:
 ### Phase 1: Core Infrastructure ✅
 - [x] Portfolio visualization system
 - [x] Badge collection and progress tracking
-- [x] Farcaster miniapp integration with proper wallet connection
+- [x] Farcaster miniapp integration with seamless wallet connection
 - [x] Responsive design implementation
 - [x] Social sharing functionality
+- [x] Streamlined user interface
 
 ### Phase 2: Data Integration 🚧
 - [ ] Live Monad blockchain data integration
@@ -319,15 +320,16 @@ For support, feature requests, or bug reports:
 ### Phase 3: Advanced Features 🔮
 - [ ] Advanced portfolio analytics
 - [ ] Social leaderboards and competitions
+- [ ] Enhanced wallet management features
 - [ ] Custom badge creation for projects
 - [ ] AI-powered portfolio insights
 - [ ] Cross-chain portfolio support
 
 ### Phase 4: Mobile & Performance 🔮
 - [ ] Progressive Web App features
+- [ ] Enhanced mobile optimizations
 - [ ] Offline functionality
 - [ ] Advanced caching strategies
-- [ ] Mobile-first optimizations
 
 ---
 
@@ -342,6 +344,5 @@ For support, feature requests, or bug reports:
 For detailed technical information:
 - [App Flow Documentation](./docs/APP_FLOW.md) - Detailed technical architecture and initialization flow
 - [Component Documentation](./src/components/) - Individual component details and props
-- [API Integration](./src/utils/monadApi.ts) - Current mock API implementation
+- [API Integration](./src/utils/monadApi.ts) - Mock API implementation ready for live data
 - [Farcaster Integration](./src/hooks/useFarcasterSDK.ts) - Social features implementation details
-- [Wallet Integration](./src/hooks/useWalletConnection.ts) - Wagmi wallet connection implementation

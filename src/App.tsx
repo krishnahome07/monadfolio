@@ -81,12 +81,6 @@ function MonadfolioApp() {
             <p className="text-purple-200 text-lg">
               Your Monad portfolio & on-chain identity
             </p>
-            {isInFarcaster && (
-              <div className="mt-2 inline-flex items-center space-x-2 bg-purple-800 bg-opacity-50 text-purple-200 px-3 py-1 rounded-full text-sm">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span>Connected via Farcaster</span>
-              </div>
-            )}
           </div>
 
           {/* Main Content */}
@@ -96,7 +90,6 @@ function MonadfolioApp() {
               <WalletConnect 
                 onConnect={handleManualConnect}
                 onWalletConnect={connect}
-                onWalletDisconnect={disconnect}
                 isInFarcaster={isInFarcaster}
                 isWalletConnected={isConnected}
                 walletAddress={address}
@@ -201,16 +194,6 @@ function MonadfolioApp() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Wallet Controls */}
-                  {address && (
-                    <button
-                      onClick={disconnect}
-                      className="text-xs text-purple-200 hover:text-white transition-colors duration-200"
-                    >
-                      Disconnect Wallet
-                    </button>
-                  )}
                   
                   {/* Farcaster User Info */}
                   {isInFarcaster && context?.user && (
