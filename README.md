@@ -1,12 +1,12 @@
 # 💼 Monadfolio - Your Monad Portfolio & Identity
 
-A beautiful, production-ready Farcaster mini-app that transforms your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio with stunning block charts, earn achievement badges based on your on-chain activity, and stay updated with the latest Monad ecosystem news.
+A beautiful, production-ready Farcaster mini-app that transforms your Monad wallet into a social, shareable on-chain identity. Visualize your portfolio of famous Monad tokens with stunning block charts, earn achievement badges based on your on-chain activity, and stay updated with the latest Monad ecosystem news.
 
 ## 🎯 App Overview
 
-Monadfolio is a comprehensive Farcaster mini-app designed to showcase your Monad on-chain identity. It combines beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
+Monadfolio is a comprehensive Farcaster mini-app designed to showcase your Monad on-chain identity. It focuses on the most popular Monad ecosystem tokens, combining beautiful portfolio visualization, gamified achievement system, and curated ecosystem news into one seamless social experience.
 
-**Current Status**: The app is fully functional with seamless Farcaster wallet integration using the official Wagmi connector. Portfolio data and news feeds are ready for live blockchain integration.
+**Current Status**: The app is fully functional with seamless Farcaster wallet integration using the official Wagmi connector. It displays famous Monad tokens (USDC, WETH, WBTC, DAI, UNI, LINK, MON) and is ready for live blockchain integration.
 
 ## ✨ Core Features
 
@@ -17,12 +17,14 @@ Monadfolio is a comprehensive Farcaster mini-app designed to showcase your Monad
 - **Portfolio Viewing**: View any Monad address portfolio with manual entry option
 
 ### 📊 Portfolio Visualization
-- **Visual Portfolio**: Stunning colored block visualization where each block's size represents your asset allocation
+- **Famous Token Focus**: Displays only the most popular Monad ecosystem tokens (USDC, WETH, WBTC, DAI, UNI, LINK, MON)
+- **Visual Portfolio**: Stunning colored block visualization where each block's size represents your token allocation
 - **Multiple Color Palettes**: Choose from 5 beautiful pre-defined color schemes (Purple Haze, Ocean Blue, Forest Green, Sunset Orange, Rose Pink)
-- **Privacy Controls**: Hide specific assets and toggle total portfolio value display
-- **Asset Management**: Show/hide individual tokens from your portfolio view
+- **Privacy Controls**: Hide specific tokens and toggle total portfolio value display
+- **Token Management**: Show/hide individual tokens from your portfolio view
 - **Responsive Design**: Beautiful visualization that works on all screen sizes
 - **Social Sharing**: Share your portfolio directly to Farcaster with one click
+- **Real Balances**: Shows actual token balances from Monad Testnet
 
 ### 🏆 Achievement Badges System
 
@@ -35,13 +37,13 @@ Monadfolio is a comprehensive Farcaster mini-app designed to showcase your Monad
 
 - **⚡ Usage Badges**: Based on on-chain activity
   - Monad Active: Complete 10+ transactions on Monad
-  - Monad DeFi User: Active in Monad DeFi ecosystem
   - Monad Social: Connected wallet via Farcaster (currently achievable)
+  - Monad DeFi User: Active in Monad DeFi ecosystem
 
 #### Badge Features
 - **Rarity System**: Common, Rare, and Legendary badges with distinct visual styling
 - **Progress Tracking**: Visual progress bar showing badge completion percentage
-- **Category Filtering**: Filter badges by NFT, Portfolio, or Usage categories
+- **Category Filtering**: Filter badges by Portfolio or Usage categories
 - **Social Sharing**: Share earned achievements to your Farcaster network
 
 ### 📰 Monad News Hub
@@ -129,7 +131,7 @@ src/
 1. **🔗 Connect**: 
    - **In Farcaster**: Automatic wallet detection and connection
    - **Web App**: Manual wallet address entry or use demo mode
-2. **👀 Visualize**: View your portfolio as stunning colored block charts
+2. **👀 Visualize**: View your famous Monad tokens as stunning colored block charts
 3. **🎨 Customize**: Choose from 5 color palettes and manage asset visibility
 4. **🏆 Achieve**: Earn badges based on your wallet activity (Farcaster connection badge currently available)
 5. **📢 Share**: Cast your portfolio and achievements to your Farcaster network
@@ -245,7 +247,8 @@ The app is deployed on Vercel with:
 
 ### ✅ Fully Implemented
 - **Farcaster Wallet Integration**: Complete with official Wagmi connector
-- **Portfolio Visualization**: Complete with color palettes and asset management
+- **Portfolio Visualization**: Complete with color palettes and famous token support
+- **Famous Token Support**: USDC, WETH, WBTC, DAI, UNI, LINK, MON detection
 - **Badge System**: Complete badge collection with progress tracking and social sharing
 - **Farcaster Integration**: Native miniapp support with social sharing
 - **Responsive Design**: Works perfectly on all devices
@@ -253,13 +256,15 @@ The app is deployed on Vercel with:
 - **Clean UX**: Streamlined interface focused on core functionality
 
 ### 🚧 In Development
-- **Live Blockchain Data**: Currently using mock data, ready for Monad integration
+- **Live Token Prices**: Currently using estimated prices, ready for price oracle integration
+- **Real Contract Addresses**: Famous token contracts ready for Monad mainnet addresses
 - **News Feed**: Framework ready, awaiting news source integration
 - **Real-time Updates**: Portfolio refresh functionality implemented
 
 ### 🔮 Future Enhancements
 - **Historical Data**: Portfolio performance tracking over time
 - **Advanced Analytics**: Detailed portfolio insights and recommendations
+- **More Tokens**: Additional famous Monad ecosystem tokens
 - **Enhanced Social Features**: Community leaderboards and competitions
 - **Mobile App**: Progressive Web App features
 - **Advanced Wallet Management**: Multi-wallet support and switching
@@ -304,7 +309,7 @@ For support, feature requests, or bug reports:
 ## 🔮 Roadmap
 
 ### Phase 1: Core Infrastructure ✅
-- [x] Portfolio visualization system
+- [x] Portfolio visualization system for famous tokens
 - [x] Badge collection and progress tracking
 - [x] Farcaster miniapp integration with seamless wallet connection
 - [x] Responsive design implementation
@@ -312,12 +317,15 @@ For support, feature requests, or bug reports:
 - [x] Streamlined user interface
 
 ### Phase 2: Data Integration 🚧
-- [ ] Live Monad blockchain data integration
+- [x] Famous Monad token integration (USDC, WETH, WBTC, DAI, UNI, LINK, MON)
+- [ ] Real contract addresses for Monad mainnet
+- [ ] Live token price integration
 - [ ] Real-time portfolio updates
 - [ ] News feed with live sources
 - [ ] Historical portfolio tracking
 
 ### Phase 3: Advanced Features 🔮
+- [ ] Additional famous token support
 - [ ] Advanced portfolio analytics
 - [ ] Social leaderboards and competitions
 - [ ] Enhanced wallet management features
@@ -344,5 +352,5 @@ For support, feature requests, or bug reports:
 For detailed technical information:
 - [App Flow Documentation](./docs/APP_FLOW.md) - Detailed technical architecture and initialization flow
 - [Component Documentation](./src/components/) - Individual component details and props
-- [API Integration](./src/utils/monadApi.ts) - Mock API implementation ready for live data
+- [API Integration](./src/utils/monadApi.ts) - Famous token implementation ready for live data
 - [Farcaster Integration](./src/hooks/useFarcasterSDK.ts) - Social features implementation details
