@@ -21,23 +21,49 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
   // Debug: Log the Farcaster user data to understand what's available
   React.useEffect(() => {
     if (farcasterUser) {
-      console.log('🔍 Farcaster user data:', {
+      console.log('🔍 WalletConnect - Farcaster user data:', {
         fid: farcasterUser.fid,
         username: farcasterUser.username,
         displayName: farcasterUser.displayName,
         verifications: farcasterUser.verifications,
+        verificationsType: typeof farcasterUser.verifications,
+        verificationsIsArray: Array.isArray(farcasterUser.verifications),
         custodyAddress: farcasterUser.custodyAddress,
+        custodyAddressType: typeof farcasterUser.custodyAddress,
         hasVerifications: farcasterUser.verifications?.length > 0,
-        hasCustodyAddress: !!farcasterUser.custodyAddress
+        hasCustodyAddress: !!farcasterUser.custodyAddress,
+        allKeys: Object.keys(farcasterUser)
       });
+      
+      // Additional detailed logging
+      if (farcasterUser.verifications) {
+        console.log('🔍 Verifications details:', farcasterUser.verifications);
+      }
+      if (farcasterUser.custodyAddress) {
+        console.log('🔍 Custody address details:', farcasterUser.custodyAddress);
+      }
     }
   }, [farcasterUser]);
 
   // Check if we have any wallet addresses available
-  const hasWalletAddresses = farcasterUser && (
-    (farcasterUser.verifications && farcasterUser.verifications.length > 0) ||
-    farcasterUser.custodyAddress
-  );
+  const hasWalletAddresses = React.useMemo(() => {
+    if (!farcasterUser) return false;
+    
+    const hasVerifications = farcasterUser.verifications && 
+                           Array.isArray(farcasterUser.verifications) && 
+                           farcasterUser.verifications.length > 0;
+    const hasCustodyAddress = farcasterUser.custodyAddress && 
+                             typeof farcasterUser.custodyAddress === 'string' && 
+                             farcasterUser.custodyAddress.length > 0;
+    
+    console.log('🔍 hasWalletAddresses calculation:', {
+      hasVerifications,
+      hasCustodyAddress,
+      result: hasVerifications || hasCustodyAddress
+    });
+    
+    return hasVerifications || hasCustodyAddress;
+  }, [farcasterUser]);
   
   // Show different UI if in Farcaster but no auto-connection happened
   const showFarcasterNoWallet = isInFarcaster && farcasterUser && !hasWalletAddresses;
@@ -141,16 +167,21 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
         )}
 
         {/* Debug Info for Development */}
-        {isInFarcaster && farcasterUser && process.env.NODE_ENV === 'development' && (
+        {isInFarcaster && farcasterUser && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
             <div className="text-sm font-medium text-yellow-800 mb-2">🔧 Debug Info:</div>
             <div className="text-xs text-yellow-700 space-y-1">
               <div>FID: {farcasterUser.fid}</div>
-              <div>Verifications: {farcasterUser.verifications?.length || 0}</div>
-              <div>Custody Address: {farcasterUser.custodyAddress ? 'Yes' : 'No'}</div>
+              <div>Verifications: {JSON.stringify(farcasterUser.verifications)}</div>
+              <div>Verifications Length: {farcasterUser.verifications?.length || 0}</div>
+              <div>Verifications Type: {typeof farcasterUser.verifications}</div>
+              <div>Custody Address: {JSON.stringify(farcasterUser.custodyAddress)}</div>
+              <div>Custody Address Type: {typeof farcasterUser.custodyAddress}</div>
+              <div>Has Wallet Addresses: {hasWalletAddresses ? 'Yes' : 'No'}</div>
               {farcasterUser.verifications && farcasterUser.verifications.length > 0 && (
                 <div>First Verification: {farcasterUser.verifications[0]}</div>
               )}
+              <div>All Keys: {Object.keys(farcasterUser).join(', ')}</div>
             </div>
           </div>
         )}

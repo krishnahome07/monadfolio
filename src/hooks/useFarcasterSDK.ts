@@ -33,9 +33,13 @@ export const useFarcasterSDK = () => {
               fid: frameContext.user.fid,
               username: frameContext.user.username,
               displayName: frameContext.user.displayName,
-              verifications: frameContext.user.verifications?.length || 0,
-              custodyAddress: frameContext.user.custodyAddress ? 'present' : 'none'
-            } : null
+              verifications: frameContext.user.verifications,
+              verificationsLength: frameContext.user.verifications?.length || 0,
+              custodyAddress: frameContext.user.custodyAddress,
+              hasCustodyAddress: !!frameContext.user.custodyAddress,
+              hasVerifications: !!(frameContext.user.verifications && frameContext.user.verifications.length > 0)
+            } : null,
+            fullContext: frameContext
           });
           
           // Only set isInFarcaster to true if we actually have a valid context

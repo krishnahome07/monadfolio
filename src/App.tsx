@@ -22,7 +22,23 @@ function MonadfolioApp() {
     // Auto-connect when in Farcaster
     useEffect(() => {
       if (isReady && isInFarcaster && context?.user && !connectedAddress) {
+    console.log('🔄 Auto-connect effect triggered:', {
+      isReady,
+      isInFarcaster,
+      hasUser: !!context?.user,
+      connectedAddress,
+      userFid: context?.user?.fid
+    });
+    
         // Try to get wallet address from Farcaster context
+      console.log('🔍 Checking for wallet addresses:', {
+        verifications: context.user.verifications,
+        verificationsType: typeof context.user.verifications,
+        verificationsLength: context.user.verifications?.length,
+        custodyAddress: context.user.custodyAddress,
+        custodyAddressType: typeof context.user.custodyAddress
+      });
+      
         if (context.user.verifications && context.user.verifications.length > 0) {
           // Use the first verified address
           const address = context.user.verifications[0];
@@ -34,7 +50,12 @@ function MonadfolioApp() {
           setConnectedAddress(context.user.custodyAddress);
         } else {
           console.log('💡 No wallet address found for Farcaster user - showing manual entry');
-        }
+        console.log('💡 No wallet address found for Farcaster user:', {
+          hasVerifications: !!(context.user.verifications && context.user.verifications.length > 0),
+          hasCustodyAddress: !!context.user.custodyAddress,
+          verifications: context.user.verifications,
+          custodyAddress: context.user.custodyAddress
+        });
       }
     }, [isReady, isInFarcaster, context?.user, connectedAddress]);
     const { 
