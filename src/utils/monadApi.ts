@@ -36,101 +36,6 @@ const ERC20_ABI = [
     constant: true,
     inputs: [],
     name: 'name',
-    outputs: [{ name: '', type: 'string' }],
-    type: 'function'
-  }
-] as const;
-
-// Simplified ERC-721 ABI for NFT count only
-const ERC721_ABI = [
-  {
-    constant: true,
-    inputs: [{ name: '_owner', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ name: '', type: 'uint256' }],
-    type: 'function'
-  }
-] as const;
-
-// Known Monad Testnet token contracts (these would need to be updated with real addresses)
-const KNOWN_TOKENS = [
-  {
-    address: '0x0000000000000000000000000000000000000000', // Placeholder - needs real MON token address
-    symbol: 'MON',
-    name: 'Monad',
-    decimals: 18
-  }
-  // Add more tokens as they become available on testnet
-];
-
-// ERC-165 ABI for interface detection
-const ERC165_ABI = [
-  {
-    constant: true,
-    inputs: [{ name: 'interfaceId', type: 'bytes4' }],
-    name: 'supportsInterface',
-    outputs: [{ name: '', type: 'bool' }],
-    type: 'function'
-  }
-] as const;
-
-// ERC-721 interface ID
-const ERC721_INTERFACE_ID = '0x80ac58cd';
-
-// Common NFT event signatures for scanning
-const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-
-// Check if a contract is an ERC-721 NFT contract
-const isERC721Contract = async (contractAddress: string): Promise<boolean> => {
-  try {
-    const supportsERC721 = await monadClient.readContract({
-      address: getAddress(contractAddress),
-      abi: ERC165_ABI,
-      functionName: 'supportsInterface',
-      args: [ERC721_INTERFACE_ID]
-    });
-    
-    return supportsERC721;
-  } catch (error) {
-    // If ERC-165 check fails, try to call balanceOf as fallback
-    try {
-      await monadClient.readContract({
-        address: getAddress(contractAddress),
-        abi: ERC721_ABI,
-        functionName: 'balanceOf',
-        args: [getAddress('0x0000000000000000000000000000000000000001')] // dummy address
-      });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-};
-
-// Get NFT count from a specific contract
-const getNFTCountFromContract = async (contractAddress: string, userAddress: string): Promise<number> => {
-  try {
-    // Check if it's an ERC-721 contract
-    const isNFTContract = await isERC721Contract(contractAddress);
-    if (!isNFTContract) {
-      return 0;
-    }
-    
-    // Get NFT balance
-    const balance = await monadClient.readContract({
-      address: getAddress(contractAddress),
-      abi: ERC721_ABI,
-      functionName: 'balanceOf',
-      args: [getAddress(userAddress)]
-    });
-    
-    const nftBalance = Number(balance);
-    return nftBalance;
-  } catch (error) {
-    console.error(`❌ Error fetching NFT count from contract ${contractAddress}:`, error);
-    return 0;
-  }
-};
 
 // Discover NFT contracts by scanning recent blocks for Transfer events
 const discoverNFTContracts = async (userAddress: string): Promise<string[]> => {
@@ -280,24 +185,14 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
       }
     }
     
-    // Get total NFT count only
-    const totalNFTCount = await getTotalNFTCount(address);
-    
     const totalValue = assets.reduce((sum, asset) => sum + asset.value, 0);
-    
-    // Create empty NFT array with just the count for display
-    const nfts: NFT[] = [];
     
     return {
       totalValue,
       assets,
-      nfts, // Empty array, but count is used in UI
+      nfts: [],
       lastUpdated: new Date(),
-      userStats: {
-        ...userStats,
-        // Add NFT count to user stats for display
-        totalNFTs: totalNFTCount
-      }
+      userStats
     };
   } catch (error) {
     console.error('❌ Error fetching portfolio:', error);
