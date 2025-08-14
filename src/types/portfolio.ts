@@ -24,6 +24,7 @@ export interface UserStats {
   firstTransactionDate?: Date;
   stakingAmount: number;
   activeProtocols: string[];
+  totalNFTs?: number;
 }
 
 export interface Portfolio {

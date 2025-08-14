@@ -276,30 +276,6 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({
       </div>
 
       {/* NFT Showcase */}
-      {portfolio.nfts && portfolio.nfts.length > 0 && (
-        <div className="border-t border-gray-200 p-6">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">NFT Collection</h3>
-          <div className="grid grid-cols-4 gap-4">
-            {portfolio.nfts.slice(0, 4).map((nft) => (
-              <div key={nft.id} className="relative group">
-                <img
-                  src={nft.imageUrl}
-                  alt={nft.name}
-                  className="w-full h-20 object-cover rounded-lg"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
-                  <div className="text-white text-sm text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="font-semibold text-sm">{nft.name}</div>
-                    {nft.floorPrice && (
-                      <div className="text-xs">{nft.floorPrice} ETH</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Share Section */}
       <div className="border-t border-gray-200 p-4">

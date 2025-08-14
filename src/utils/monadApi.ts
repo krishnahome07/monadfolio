@@ -245,8 +245,6 @@ const fetchTokenBalance = async (tokenAddress: string, userAddress: string, toke
 
 export const fetchPortfolio = async (address: string, farcasterUser?: Context.User): Promise<Portfolio> => {
   try {
-    console.log('🔍 Fetching portfolio for address:', address);
-    
     const userStats = await fetchUserStats(address);
     
     // Get native MON balance
@@ -282,43 +280,24 @@ export const fetchPortfolio = async (address: string, farcasterUser?: Context.Us
       }
     }
     
-    // Discover and fetch NFTs from all contracts (like Monad Explorer)
-    const nfts: NFT[] = [];
-    
-    console.log('🎨 Starting NFT discovery...');
-    
-    // Discover NFT contracts by scanning blockchain events
-    const discoveredContracts = await discoverNFTContracts(address);
-    
-    console.log(`🔍 Discovered ${discoveredContracts.length} potential NFT contracts`);
-    
-    // Fetch NFTs from discovered contracts
-    for (const contractAddress of discoveredContracts) {
-      try {
-        const contractNFTs = await fetchNFTsFromContract(contractAddress, address);
-        nfts.push(...contractNFTs);
-      } catch (error) {
-        console.error(`❌ Error fetching NFTs from ${contractAddress}:`, error);
-      }
-    }
-    
-    console.log(`🎨 Total NFTs found: ${nfts.length}`);
+    // Get total NFT count only
+    const totalNFTCount = await getTotalNFTCount(address);
     
     const totalValue = assets.reduce((sum, asset) => sum + asset.value, 0);
     
-    console.log('✅ Portfolio fetched:', { 
-      totalValue, 
-      assetsCount: assets.length, 
-      nftsCount: nfts.length,
-      transactions: userStats.totalTransactions 
-    });
+    // Create empty NFT array with just the count for display
+    const nfts: NFT[] = [];
     
     return {
       totalValue,
       assets,
-      nfts,
+      nfts, // Empty array, but count is used in UI
       lastUpdated: new Date(),
-      userStats
+      userStats: {
+        ...userStats,
+        // Add NFT count to user stats for display
+        totalNFTs: totalNFTCount
+      }
     };
   } catch (error) {
     console.error('❌ Error fetching portfolio:', error);
