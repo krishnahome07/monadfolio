@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { config } from './lib/wagmi';
 import { WalletConnect } from './components/WalletConnect';
 import { PortfolioSnapshot } from './components/PortfolioSnapshot';
 import { BadgeCollection } from './components/BadgeCollection';
 import { MonadNews } from './components/MonadNews';
 import { MaintenanceMode } from './components/MaintenanceMode';
 import { useFarcasterSDK } from './hooks/useFarcasterSDK';
+import { useWalletConnection } from './hooks/useWalletConnection';
 import { usePortfolio } from './hooks/usePortfolio';
 import { useMonadNews } from './hooks/useMonadNews';
 import { Wallet, Award, Newspaper } from 'lucide-react';
@@ -15,50 +18,15 @@ const queryClient = new QueryClient();
 function MonadfolioApp() {
   try {
     const { context, isReady, isInFarcaster } = useFarcasterSDK();
+    const { isConnected, address, isConnecting, connect, disconnect, hasWalletAvailable } = useWalletConnection();
     
     const [activeTab, setActiveTab] = useState<'portfolio' | 'badges' | 'news'>('portfolio');
     const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
-
-    // Auto-connect when in Farcaster
-    useEffect(() => {
-      if (isReady && isInFarcaster && context?.user && !connectedAddress) {
-    console.log('🔄 Auto-connect effect triggered:', {
-      isReady,
-      isInFarcaster,
-      hasUser: !!context?.user,
-      connectedAddress,
-      userFid: context?.user?.fid
-    });
+    const [manualAddress, setManualAddress] = useState<string | null>(null);
     
-        // Try to get wallet address from Farcaster context
-      console.log('🔍 Checking for wallet addresses:', {
-        verifications: context.user.verifications,
-        verificationsType: typeof context.user.verifications,
-        verificationsLength: context.user.verifications?.length,
-        custodyAddress: context.user.custodyAddress,
-        custodyAddressType: typeof context.user.custodyAddress
-      });
-      
-        if (context.user.verifications && context.user.verifications.length > 0) {
-          // Use the first verified address
-          const address = context.user.verifications[0];
-          console.log('🔗 Auto-connecting Farcaster user wallet:', address);
-          setConnectedAddress(address);
-        } else if (context.user.custodyAddress) {
-          // Use custody address as fallback
-          console.log('🔗 Auto-connecting Farcaster custody address:', context.user.custodyAddress);
-          setConnectedAddress(context.user.custodyAddress);
-        } else {
-          console.log('💡 No wallet address found for Farcaster user - showing manual entry');
-        console.log('💡 No wallet address found for Farcaster user:', {
-          hasVerifications: !!(context.user.verifications && context.user.verifications.length > 0),
-          hasCustodyAddress: !!context.user.custodyAddress,
-          verifications: context.user.verifications,
-          custodyAddress: context.user.custodyAddress
-        });
-        }
-      }
-    }, [isReady, isInFarcaster, context?.user, connectedAddress]);
+    // Use either connected wallet address or manual address
+    const connectedAddress = address || manualAddress;
+
     const { 
       portfolio, 
       badges, 
@@ -72,9 +40,9 @@ function MonadfolioApp() {
 
     const { news, loading: newsLoading, error: newsError, refreshNews } = useMonadNews();
 
-    const handleConnect = (address: string) => {
+    const handleManualConnect = (address: string) => {
       console.log('🔍 Connecting to address:', address);
-      setConnectedAddress(address);
+      setManualAddress(address);
     };
 
     const appEnabledEnv = import.meta.env.VITE_APP_ENABLED;
@@ -122,8 +90,14 @@ function MonadfolioApp() {
           {!connectedAddress ? (
             <div className="max-w-md mx-auto">
               <WalletConnect 
-                onConnect={handleConnect}
+                onConnect={handleManualConnect}
+                onWalletConnect={connect}
+                onWalletDisconnect={disconnect}
                 isInFarcaster={isInFarcaster}
+                isWalletConnected={isConnected}
+                walletAddress={address}
+                isConnecting={isConnecting}
+                hasWalletAvailable={hasWalletAvailable}
                 farcasterUser={context?.user}
               />
             </div>
@@ -211,17 +185,27 @@ function MonadfolioApp() {
               {/* Connected Address Info */}
               <div className="text-center">
                 <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-4 max-w-md mx-auto">
-                  <div className="flex items-center justify-center space-x-3">
+                  <div className="flex items-center justify-center space-x-3 mb-2">
                     <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                     <div>
                       <div className="text-white text-sm font-medium">
-                        Portfolio Viewer
+                        {address ? 'Wallet Connected' : 'Portfolio Viewer'}
                       </div>
                       <div className="text-purple-200 text-xs font-mono">
                         {connectedAddress}
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Wallet Controls */}
+                  {address && (
+                    <button
+                      onClick={disconnect}
+                      className="text-xs text-purple-200 hover:text-white transition-colors duration-200"
+                    >
+                      Disconnect Wallet
+                    </button>
+                  )}
                   
                   {/* Farcaster User Info */}
                   {isInFarcaster && context?.user && (
@@ -266,7 +250,9 @@ function MonadfolioApp() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <MonadfolioApp />
+      <WagmiProvider config={config}>
+        <MonadfolioApp />
+      </WagmiProvider>
     </QueryClientProvider>
   );
 }
